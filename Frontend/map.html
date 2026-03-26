@@ -24,7 +24,6 @@
           <a href="reports.html">📋 Всички сигнали</a>
         </div>
       </li>
-      <li><a href="#">Контакти</a></li>
     </ul>
     <div class="nav-auth">
       <div id="authButtons">
@@ -341,48 +340,86 @@
   }
 
   function buildPopup(r, index) {
-    const color       = getColor(r.risk);
+    const color        = getColor(r.risk);
     const confirmCount = (r.confirmations || []).length;
-    const VERIFY_THRESHOLD = 3;
+    const THRESHOLD    = 3;
+    const currentUser  = localStorage.getItem('resq_session');
 
-    const verifiedBadge = r.verified
-      ? '<span style="color:#4ade80;font-weight:700">✅ Потвърден</span>'
-      : `<span style="color:#fbbf24">⚠️ Непотвърден</span>`;
+    /* ─── Status badge ─── */
+    let statusBadge;
+    if (r.verified) {
+      statusBadge = `<div style="
+        display:inline-flex;align-items:center;gap:6px;
+        background:rgba(74,222,128,0.15);border:1px solid rgba(74,222,128,0.35);
+        border-radius:20px;padding:4px 12px;margin:6px 0;
+        font-size:0.82rem;font-weight:700;color:#4ade80
+      ">✅ Потвърдено от общността</div>`;
+    } else {
+      /* Build X/3 circles */
+      const dots = [1,2,3].map(n => {
+        const filled = n <= confirmCount;
+        const bg     = filled ? '#6366f1' : 'rgba(255,255,255,0.08)';
+        const label  = n <= confirmCount ? '✓' : n;
+        return `<div style="
+          width:28px;height:28px;border-radius:50%;
+          background:${bg};display:inline-flex;
+          align-items:center;justify-content:center;
+          font-size:0.75rem;font-weight:700;
+          color:${filled ? 'white' : '#475569'};
+          border:1px solid ${filled ? '#6366f1' : 'rgba(255,255,255,0.1)'};
+          transition:all 0.3s;
+        ">${label}</div>`;
+      }).join('');
 
-    const progressBar = !r.verified ? `
-      <div style="margin:6px 0;background:rgba(255,255,255,0.08);border-radius:20px;height:6px;width:100%;">
-        <div style="height:6px;border-radius:20px;background:linear-gradient(90deg,#fbbf24,#f59e0b);width:${Math.min(100, (confirmCount/VERIFY_THRESHOLD)*100)}%"></div>
-      </div>
-      <small style="color:#64748b">${confirmCount}/${VERIFY_THRESHOLD} потвърждения</small>` : '';
+      statusBadge = `
+        <div style="margin:8px 0 4px">
+          <div style="font-size:0.78rem;color:#64748b;margin-bottom:6px">
+            Потвърждения: <strong style="color:#94a3b8">${confirmCount}/3</strong>
+          </div>
+          <div style="display:flex;gap:6px;align-items:center">${dots}</div>
+        </div>`;
+    }
 
-    const currentUser = localStorage.getItem('resq_session');
+    /* ─── Confirm button ─── */
     let confirmBtn = '';
     if (currentUser && currentUser !== r.user && !r.verified) {
       const alreadyConfirmed = (r.confirmations || []).includes(currentUser);
       if (alreadyConfirmed) {
-        confirmBtn = `<div style="margin-top:10px;padding:8px;background:rgba(99,102,241,0.1);border:1px solid rgba(99,102,241,0.2);border-radius:8px;font-size:0.8rem;color:#818cf8;text-align:center">
-          ✔ Вече потвърди този сигнал
-        </div>`;
+        confirmBtn = `<div style="
+          margin-top:10px;padding:8px;
+          background:rgba(99,102,241,0.1);border:1px solid rgba(99,102,241,0.2);
+          border-radius:8px;font-size:0.8rem;color:#818cf8;text-align:center
+        ">✔ Вече потвърди този сигнал</div>`;
       } else {
-        confirmBtn = `<button onclick="verifyReport(${index})" style="
-          margin-top:10px;width:100%;padding:9px;
-          background:linear-gradient(135deg,#4f46e5,#818cf8);
-          border:none;border-radius:9px;color:white;
-          font-family:Outfit,sans-serif;font-size:0.85rem;font-weight:700;
-          cursor:pointer;transition:filter 0.2s;
-        " onmouseover="this.style.filter='brightness(1.15)'" onmouseout="this.style.filter='none'">
-          👍 Потвърди сигнала
-        </button>`;
+        confirmBtn = `<button
+          onclick="event.stopPropagation(); verifyReport(${index})"
+          style="
+            margin-top:10px;width:100%;padding:9px;
+            background:linear-gradient(135deg,#4f46e5,#818cf8);
+            border:none;border-radius:9px;color:white;
+            font-family:Outfit,sans-serif;font-size:0.85rem;font-weight:700;
+            cursor:pointer;
+          "
+          onmouseover="this.style.filter='brightness(1.15)'"
+          onmouseout="this.style.filter='none'"
+        >👍 Потвърди сигнала</button>`;
       }
+    } else if (!currentUser && !r.verified) {
+      confirmBtn = `<div style="
+        margin-top:10px;padding:8px;
+        background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);
+        border-radius:8px;font-size:0.8rem;color:#475569;text-align:center
+      ">🔑 Влезте, за да потвърдите</div>`;
     }
 
     return `
-      <div style="font-family:Outfit,sans-serif;min-width:200px;padding:2px 0">
+      <div style="font-family:Outfit,sans-serif;min-width:210px;padding:2px 0">
         <strong style="font-size:1rem">${getEmoji(r.type)} ${getLabel(r.type)}</strong><br>
-        <span style="color:${color}">● Риск: ${r.risk === 'low' ? 'Нисък' : r.risk === 'medium' ? 'Среден' : 'Висок'}</span><br>
-        ${verifiedBadge}<br>
-        ${progressBar}
-        ${r.desc ? `<em style="display:block;margin-top:6px;color:#94a3b8">"${r.desc}"</em>` : ''}
+        <span style="color:${color}">● Риск: ${
+          r.risk === 'low' ? 'Нисък' : r.risk === 'medium' ? 'Среден' : 'Висок'
+        }</span>
+        ${statusBadge}
+        ${r.desc ? `<em style="display:block;margin-top:4px;color:#94a3b8">"${r.desc}"</em>` : ''}
         <small style="color:#475569;display:block;margin-top:6px">👤 ${r.user} — ${r.time}</small>
         ${confirmBtn}
       </div>
@@ -396,25 +433,34 @@
 
     const r = reports[index];
     if (!r) return;
-    if (r.user === currentUser) return; // can't self-verify
-    if ((r.confirmations || []).includes(currentUser)) return; // already confirmed
+    if (r.user === currentUser) {
+      showToast('⚠️ Не можеш да потвърдиш собствен сигнал.', 'warn'); return;
+    }
+    if ((r.confirmations || []).includes(currentUser)) return;
 
     r.confirmations = r.confirmations || [];
     r.confirmations.push(currentUser);
 
-    if (r.confirmations.length >= 3) {
+    const count = r.confirmations.length;
+
+    if (count >= 3) {
       r.verified = true;
+      if (r._marker) r._marker.setStyle({ color: '#4ade80', fillColor: '#4ade80' });
       showToast('✅ Сигналът е потвърден от общността!', 'ok');
     } else {
-      showToast(`👍 Потвърждение добавено (${r.confirmations.length}/3)`, 'ok');
+      showToast(`👍 Потвърждение добавено — ${count}/3`, 'ok');
     }
 
-    // Persist
-    localStorage.setItem('resq_reports', JSON.stringify(reports));
+    // Persist (strip non-serialisable _marker before saving)
+    const toSave = reports.map(rep => {
+      const { _marker, ...rest } = rep;
+      return rest;
+    });
+    localStorage.setItem('resq_reports', JSON.stringify(toSave));
 
-    // Refresh popup content live
-    if (r._marker) {
-      r._marker.setPopupContent(buildPopup(r, index));
+    // Update popup DOM directly — popup stays open, no flicker
+    if (r._marker && r._marker.getPopup()) {
+      r._marker.getPopup().setContent(buildPopup(r, index));
     }
   }
 
