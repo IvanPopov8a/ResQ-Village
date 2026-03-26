@@ -38,6 +38,60 @@
 
 <div id="map"></div>
 
+<!-- Floating Report Button -->
+<button class="btn-report" id="reportBtn" onclick="startReport()">
+  🚨 Сигнализирай за бедствие
+</button>
+
+<!-- Report hint banner -->
+<div class="report-hint" id="reportHint" style="display:none;">
+  📍 Кликнете върху картата, за да поставите маркер
+  <button class="report-hint-cancel" onclick="cancelReport()">✕ Отказ</button>
+</div>
+
+<!-- Report Modal -->
+<div id="reportModal">
+  <div id="reportModalContent">
+    <button class="modal-close" onclick="closeReport()">✕</button>
+    <h3 class="report-title">🚨 Сигнал за бедствие</h3>
+
+    <label class="report-label">Тип бедствие</label>
+    <select id="reportType" class="report-select">
+      <option value="fire">🔥 Пожар</option>
+      <option value="flood">🌊 Наводнение</option>
+      <option value="earthquake">🌍 Земетресение</option>
+      <option value="storm">⛈️ Буря</option>
+      <option value="landslide">🏔️ Свлачище</option>
+      <option value="other">⚠️ Друго</option>
+    </select>
+
+    <label class="report-label">Ниво на риск</label>
+    <select id="reportRisk" class="report-select">
+      <option value="low">🟢 Нисък</option>
+      <option value="medium">🟡 Среден</option>
+      <option value="high">🔴 Висок / Критичен</option>
+    </select>
+
+    <label class="report-label">Описание (по избор)</label>
+    <textarea id="reportDesc" class="report-textarea" placeholder="Какво наблюдавате? Например: голям пожар край село…" rows="3"></textarea>
+
+    <button class="btn-report-submit" onclick="askConfirmReport()">📤 Изпрати сигнал</button>
+  </div>
+</div>
+
+<!-- Confirmation Modal -->
+<div id="confirmModal" style="display:none;">
+  <div id="confirmModalContent">
+    <div class="confirm-icon">⚠️</div>
+    <h3 class="confirm-title">Потвърди сигнала</h3>
+    <p class="confirm-body">Сигурен ли си, че искаш да подадеш сигнал за бедствие на тази локация?<br><br><strong>Подаването на фалшиви сигнали е нарушение на правилата.</strong></p>
+    <div class="confirm-buttons">
+      <button class="btn-confirm-cancel" onclick="closeConfirm()">✕ Отказ</button>
+      <button class="btn-confirm-ok" onclick="submitReport()">✅ Да, изпрати</button>
+    </div>
+  </div>
+</div>
+
 <div class="legend">
   <strong>Нива на риск:</strong>
   <div class="low">● Нисък</div>
@@ -97,12 +151,198 @@
   }).addTo(map);
 
   function getColor(risk) {
-    if (risk === "low") return "#4ade80";
-    if (risk === "medium") return "#fbbf24";
-    return "#ef4444";
+    if (risk === 'low')    return '#4ade80';
+    if (risk === 'medium') return '#fbbf24';
+    return '#ef4444';
   }
 
-  // Бъдещо развитие: Тук ще се зареждат данни за бедствия.
+  function getEmoji(type) {
+    const icons = { fire:'🔥', flood:'🌊', earthquake:'🌍', storm:'⛈️', landslide:'🏔️', other:'⚠️' };
+    return icons[type] || '⚠️';
+  }
+
+  function getLabel(type) {
+    const labels = { fire:'Пожар', flood:'Наводнение', earthquake:'Земетресение', storm:'Буря', landslide:'Свлачище', other:'Друго' };
+    return labels[type] || type;
+  }
+
+  /* ====== Report System ====== */
+  let reportMode = false;
+  let reportLatLng = null;
+  let tempMarker = null;
+  let reports = JSON.parse(localStorage.getItem('resq_reports') || '[]');
+
+  const COOLDOWN_MS   = 15 * 60 * 1000; // 15 minutes
+  const BLOCK_RADIUS  = 0.018;           // ~2 km in degrees
+
+  // Render existing reports on load
+  reports.forEach(r => addMarker(r));
+
+  /* --- Anti-spam helpers --- */
+  function canReport(username) {
+    const key  = 'resq_last_report_' + username;
+    const last = parseInt(localStorage.getItem(key) || '0', 10);
+    const now  = Date.now();
+    if (now - last < COOLDOWN_MS) {
+      const remaining = Math.ceil((COOLDOWN_MS - (now - last)) / 60000);
+      showToast(`⏱️ Изчакай още ${remaining} мин. преди следващ сигнал.`, 'warn');
+      return false;
+    }
+    return true;
+  }
+
+  function stampReport(username) {
+    localStorage.setItem('resq_last_report_' + username, Date.now().toString());
+  }
+
+  function isTooClose(lat, lng) {
+    return reports.some(d => {
+      const dist = Math.sqrt(Math.pow(d.lat - lat, 2) + Math.pow(d.lng - lng, 2));
+      return dist < BLOCK_RADIUS;
+    });
+  }
+
+  /* --- UI flow --- */
+  function startReport() {
+    if (!localStorage.getItem('resq_session')) {
+      openAuth('login');
+      return;
+    }
+    reportMode = true;
+    document.getElementById('reportHint').style.display = 'flex';
+    document.getElementById('reportBtn').style.display = 'none';
+    document.getElementById('map').style.cursor = 'crosshair';
+  }
+
+  function cancelReport() {
+    reportMode = false;
+    reportLatLng = null;
+    if (tempMarker) { map.removeLayer(tempMarker); tempMarker = null; }
+    document.getElementById('reportHint').style.display = 'none';
+    document.getElementById('reportBtn').style.display = 'flex';
+    document.getElementById('map').style.cursor = '';
+  }
+
+  map.on('click', function(e) {
+    if (!reportMode) return;
+
+    const user = localStorage.getItem('resq_session') || 'Анонимен';
+
+    // ── Guard 1: Rate limit ──
+    if (!canReport(user)) {
+      cancelReport();
+      return;
+    }
+
+    // ── Guard 2: Location lock ──
+    if (isTooClose(e.latlng.lat, e.latlng.lng)) {
+      showToast('📍 Вече има сигнал в този район!', 'warn');
+      cancelReport();
+      return;
+    }
+
+    reportLatLng = e.latlng;
+
+    if (tempMarker) map.removeLayer(tempMarker);
+    tempMarker = L.circleMarker([e.latlng.lat, e.latlng.lng], {
+      radius: 12, color: '#a78bfa', fillColor: '#a78bfa', fillOpacity: 0.6, weight: 2
+    }).addTo(map);
+
+    document.getElementById('reportModal').style.display = 'flex';
+    document.getElementById('reportHint').style.display = 'none';
+  });
+
+  function closeReport() {
+    document.getElementById('reportModal').style.display = 'none';
+    cancelReport();
+  }
+
+  /* ── Guard 3: Confirmation step ── */
+  function askConfirmReport() {
+    if (!reportLatLng) return;
+    document.getElementById('reportModal').style.display = 'none';
+    document.getElementById('confirmModal').style.display = 'flex';
+  }
+
+  function closeConfirm() {
+    document.getElementById('confirmModal').style.display = 'none';
+    document.getElementById('reportModal').style.display = 'flex';
+  }
+
+  function submitReport() {
+    document.getElementById('confirmModal').style.display = 'none';
+    if (!reportLatLng) return;
+
+    const type = document.getElementById('reportType').value;
+    const risk = document.getElementById('reportRisk').value;
+    const desc = document.getElementById('reportDesc').value.trim();
+    const user = localStorage.getItem('resq_session') || 'Анонимен';
+
+    const report = {
+      lat: reportLatLng.lat,
+      lng: reportLatLng.lng,
+      type, risk, desc, user,
+      verified: false,
+      time: new Date().toLocaleString('bg-BG')
+    };
+
+    reports.push(report);
+    localStorage.setItem('resq_reports', JSON.stringify(reports));
+    stampReport(user);
+
+    if (tempMarker) { map.removeLayer(tempMarker); tempMarker = null; }
+    addMarker(report);
+
+    document.getElementById('reportType').value = 'fire';
+    document.getElementById('reportRisk').value = 'low';
+    document.getElementById('reportDesc').value = '';
+    reportMode = false;
+    reportLatLng = null;
+    document.getElementById('reportBtn').style.display = 'flex';
+    document.getElementById('map').style.cursor = '';
+    showToast('✅ Сигналът е изпратен успешно!', 'ok');
+  }
+
+  /* ── Toast helper ── */
+  function showToast(msg, type) {
+    let t = document.getElementById('resqToast');
+    if (!t) {
+      t = document.createElement('div');
+      t.id = 'resqToast';
+      document.body.appendChild(t);
+    }
+    t.textContent = msg;
+    t.className = 'resq-toast ' + (type === 'ok' ? 'toast-ok' : 'toast-warn');
+    t.style.opacity = '1';
+    clearTimeout(t._timeout);
+    t._timeout = setTimeout(() => { t.style.opacity = '0'; }, 3500);
+  }
+
+  function addMarker(r) {
+    const color = getColor(r.risk);
+    const marker = L.circleMarker([r.lat, r.lng], {
+      radius: 10,
+      color: color,
+      fillColor: color,
+      fillOpacity: 0.8,
+      weight: 2,
+      className: r.risk === 'high' ? 'pulse-marker' : ''
+    }).addTo(map);
+
+    const verifiedBadge = r.verified
+      ? '<span style="color:#4ade80">✅ Потвърден</span>'
+      : '<span style="color:#fbbf24">⚠️ Непотвърден</span>';
+    const popup = `
+      <div style="font-family:Outfit,sans-serif; min-width:180px;">
+        <strong>${getEmoji(r.type)} ${getLabel(r.type)}</strong><br>
+        <span style="color:${color}">● Риск: ${r.risk === 'low' ? 'Нисък' : r.risk === 'medium' ? 'Среден' : 'Висок'}</span><br>
+        ${verifiedBadge}<br>
+        ${r.desc ? '<em>"' + r.desc + '"</em><br>' : ''}
+        <small>👤 ${r.user} — ${r.time}</small>
+      </div>
+    `;
+    marker.bindPopup(popup);
+  }
 </script>
 
 </body>
