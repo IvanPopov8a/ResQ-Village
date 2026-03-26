@@ -852,3 +852,17 @@ header.navbar::before {
   border: 1px solid rgba(251, 191, 36, 0.3);
   color: #fef3c7;
 }
+
+/* ===== Description inline error ===== */
+.desc-error {
+  margin: 6px 0 0;
+  padding: 8px 12px;
+  background: rgba(248, 113, 113, 0.12);
+  border: 1px solid rgba(248, 113, 113, 0.35);
+  border-radius: 8px;
+  color: #fca5a5;
+  font-size: 0.82rem;
+  font-weight: 500;
+  line-height: 1.4;
+  animation: slideUp 0.2s ease;
+}

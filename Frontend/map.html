@@ -75,7 +75,8 @@
     </select>
 
     <label class="report-label">Описание (по избор)</label>
-    <textarea id="reportDesc" class="report-textarea" placeholder="Какво наблюдавате? Например: голям пожар край село…" rows="3"></textarea>
+    <textarea id="reportDesc" class="report-textarea" placeholder="Какво наблюдавате? Например: голям пожар край село…" rows="3" oninput="clearDescError()"></textarea>
+    <p id="descError" class="desc-error" style="display:none;"></p>
 
     <button class="btn-report-submit" onclick="askConfirmReport()">📤 Изпрати сигнал</button>
   </div>
@@ -259,11 +260,82 @@
     cancelReport();
   }
 
-  /* ── Guard 3: Confirmation step ── */
+  /* ── Guard 3: Confirmation step (with content filter) ── */
   function askConfirmReport() {
     if (!reportLatLng) return;
+
+    const desc = document.getElementById('reportDesc').value.trim();
+    const error = validateDescription(desc);
+    if (error) {
+      showDescError(error);
+      return;
+    }
+
     document.getElementById('reportModal').style.display = 'none';
     document.getElementById('confirmModal').style.display = 'flex';
+  }
+
+  /* ── Content validator ── */
+  function validateDescription(text) {
+    if (!text) return null; // blank is optional — always allowed
+
+    if (text.length < 5)
+      return '⚠️ Описанието е прекалено късо — моля, добави повече детайли.';
+
+    if (text.length > 300)
+      return '⚠️ Описанието е прекалено дълго (макс. 300 знака).';
+
+    // Repeated character spam: "aaaaaaa", "!!!!!!!"
+    if (/(.)\1{5,}/.test(text))
+      return '⚠️ Описанието изглежда като спам. Моля, пиши смислено описание.';
+
+    // Only symbols / numbers — no real words
+    if (/^[^a-zA-Z\u0400-\u04ff]+$/.test(text))
+      return '⚠️ Описанието трябва да съдържа текст, не само цифри или символи.';
+
+    // Excessive caps (>70% uppercase)
+    const letters = text.replace(/[^a-zA-Z\u0400-\u04ff]/g, '');
+    if (letters.length > 4) {
+      const upperCount = letters.replace(/[^A-Z\u0410-\u042f]/g, '').length;
+      if (upperCount / letters.length > 0.7)
+        return '⚠️ Моля, не пиши цялото с ГЛАВНИ БУКВИ.';
+    }
+
+    // Inappropriate word blocklist
+    const BLOCKLIST = [
+      'майна','пезда','ебат','курва','боклук','гадно','мамка','пика',
+      'боклганак','педераст','шибан','курвачка','ебавам','ядеса','дупе','глупак',
+      'кретен','отивъд','проститутка','смашкар','магаре','цицела','скатаеш',
+      'fuck','shit','bitch','cunt','dick','pussy','asshole',
+      'bastard','idiot','moron','retard','fag','slut','whore','prick','cock',
+      'test','asdf','qwerty','zxcv','abcd'
+    ];
+
+    const lower = text.toLowerCase();
+    for (const word of BLOCKLIST) {
+      const re = new RegExp('(^|[^a-z\u0430-\u044f])' + word + '([^a-z\u0430-\u044f]|$)', 'i');
+      if (re.test(lower))
+        return '⚠️ Описанието съдържа неподходящо съдържание. Моля, опишете бедствието адекватно.';
+    }
+
+    return null; // all clear
+  }
+
+  function showDescError(msg) {
+    const el = document.getElementById('descError');
+    el.textContent = msg;
+    el.style.display = 'block';
+    const ta = document.getElementById('reportDesc');
+    ta.style.borderColor = '#f87171';
+    ta.style.boxShadow = '0 0 0 3px rgba(248,113,113,0.2)';
+    ta.focus();
+  }
+
+  function clearDescError() {
+    const el = document.getElementById('descError');
+    if (el) el.style.display = 'none';
+    const ta = document.getElementById('reportDesc');
+    if (ta) { ta.style.borderColor = ''; ta.style.boxShadow = ''; }
   }
 
   function closeConfirm() {
