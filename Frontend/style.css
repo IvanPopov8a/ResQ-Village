@@ -74,6 +74,7 @@ header.navbar::before {
   background-clip: text;
   -webkit-text-fill-color: transparent;
   transition: filter 0.3s;
+  margin-right: auto;
 }
 
 .logo:hover {
