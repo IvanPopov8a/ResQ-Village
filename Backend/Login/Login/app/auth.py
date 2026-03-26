@@ -15,6 +15,7 @@ ACCESS_TOKEN_EXPIRE_MINUTES = 60
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
+# This extracts the Bearer token from the Authorization header
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="login")
 
 
