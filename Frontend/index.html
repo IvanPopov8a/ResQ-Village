@@ -8,7 +8,7 @@
 </head>
 <body>
 
-  <!-- Използваме общата навигационна лента -->
+  <!-- Навигационна лента -->
   <header class="navbar">
     <a href="index.html" class="logo">🌍 ResQ Village</a>
     <ul class="nav-links">
@@ -16,12 +16,25 @@
       <li class="dropdown">
         <a href="#">Платформа ▼</a>
         <div class="dropdown-content">
-          <a href="map.html">Карта на риска</a>
-          <a href="#">(Очаквайте още страници)</a>
+          <a href="map.html">🗺️ Карта на риска</a>
+          <a href="alerts.html">🔔 Ранно предупреждение</a>
+          <a href="medical.html">🏥 Медицинска помощ</a>
+          <a href="guides.html">📖 Наръчници за оцеляване</a>
+          <a href="reports.html">📋 Всички сигнали</a>
         </div>
       </li>
-      <li><a href="#">Контакти</a></li>
     </ul>
+    <div class="nav-auth">
+      <div id="authButtons">
+        <button class="btn-nav-login" onclick="openAuth('login')">🔑 Вход</button>
+        <button class="btn-nav-register" onclick="openAuth('register')">📝 Регистрация</button>
+      </div>
+      <div id="userGreeting" style="display:none;">
+        <div class="user-avatar" id="userAvatar">U</div>
+        <span id="userName"></span>
+        <button class="btn-nav-logout" onclick="logout()">Изход</button>
+      </div>
+    </div>
   </header>
 
   <!-- Главен екран -->
@@ -30,6 +43,35 @@
     <p>ResQ Village предоставя интелигентна платформа за проследяване, прогнозиране и мониторинг на бедствия. Поддържаме общностите информирани и подготвени за извънредни ситуации.</p>
     <a href="map.html" class="btn-primary">Отвори картата</a>
   </section>
+
+  <!-- Auth Modal -->
+  <div id="authModal">
+    <div id="authModalContent">
+      <button class="modal-close" onclick="closeAuth()">✕</button>
+      <div class="auth-logo">🚑 ResQ Village</div>
+      <div class="auth-tabs">
+        <button class="auth-tab active" id="tabLogin" onclick="switchTab('login')">Вход</button>
+        <button class="auth-tab" id="tabRegister" onclick="switchTab('register')">Регистрация</button>
+      </div>
+      <form id="loginForm" class="auth-form" onsubmit="doLogin(event)">
+        <div class="input-group"><span class="input-icon">👤</span><input type="text" id="loginUser" placeholder="Потребителско име" required></div>
+        <div class="input-group"><span class="input-icon">🔒</span><input type="password" id="loginPass" placeholder="Парола" required></div>
+        <button type="submit" class="btn-auth-submit">Вход</button>
+        <p class="auth-hint">Нямате акаунт? <a href="#" onclick="switchTab('register');return false;">Регистрирайте се</a></p>
+      </form>
+      <form id="registerForm" class="auth-form" style="display:none;" onsubmit="doRegister(event)">
+        <div class="input-group"><span class="input-icon">👤</span><input type="text" id="regUser" placeholder="Потребителско име" required></div>
+        <div class="input-group"><span class="input-icon">✉️</span><input type="email" id="regEmail" placeholder="Имейл" required></div>
+        <div class="input-group"><span class="input-icon">🔒</span><input type="password" id="regPass" placeholder="Парола" required></div>
+        <div class="input-group"><span class="input-icon">🔒</span><input type="password" id="regPass2" placeholder="Потвърдете паролата" required></div>
+        <button type="submit" class="btn-auth-submit">Регистрация</button>
+        <p class="auth-hint">Вече имате акаунт? <a href="#" onclick="switchTab('login');return false;">Влезте</a></p>
+      </form>
+      <p id="authMsg" class="auth-message"></p>
+    </div>
+  </div>
+
+  <script src="auth.js"></script>
 
 </body>
 </html>

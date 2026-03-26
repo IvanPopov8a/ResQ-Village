@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="bg">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ResQ Village - Ранно предупреждение</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="page.css">
+</head>
+<body>
+
+  <header class="navbar">
+    <a href="index.html" class="logo">🌍 ResQ Village</a>
+    <ul class="nav-links">
+      <li><a href="index.html">Начало</a></li>
+      <li class="dropdown">
+        <a href="#">Платформа ▼</a>
+        <div class="dropdown-content">
+          <a href="map.html">🗺️ Карта на риска</a>
+          <a href="alerts.html">🔔 Ранно предупреждение</a>
+          <a href="medical.html">🏥 Медицинска помощ</a>
+          <a href="guides.html">📖 Наръчници за оцеляване</a>
+          <a href="reports.html">📋 Всички сигнали</a>
+        </div>
+      </li>
+    </ul>
+    <div class="nav-auth">
+      <div id="authButtons">
+        <button class="btn-nav-login" onclick="openAuth('login')">🔑 Вход</button>
+        <button class="btn-nav-register" onclick="openAuth('register')">📝 Регистрация</button>
+      </div>
+      <div id="userGreeting" style="display:none;">
+        <div class="user-avatar" id="userAvatar">U</div>
+        <span id="userName"></span>
+        <button class="btn-nav-logout" onclick="logout()">Изход</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="page-main">
+    <div class="page-hero alerts-hero">
+      <div class="page-hero-icon">🔔</div>
+      <h1>Ранно предупреждение</h1>
+      <p>Мониторинг на метеорологични и сеизмични данни в реално време за България. Получавайте навременни предупреждения преди настъпване на бедствие.</p>
+    </div>
+
+    <div class="alerts-grid">
+      <div class="alert-card alert-low">
+        <div class="alert-card-icon">🌬️</div>
+        <div class="alert-card-body">
+          <div class="alert-badge badge-low">НИСЪК РИСК</div>
+          <h3>Силен вятър</h3>
+          <p>Скорост 45-55 км/ч в планинските райони. Препоръчва се внимание при шофиране.</p>
+          <span class="alert-time">Преди 12 мин.</span>
+        </div>
+      </div>
+
+      <div class="alert-card alert-medium">
+        <div class="alert-card-icon">🌧️</div>
+        <div class="alert-card-body">
+          <div class="alert-badge badge-medium">СРЕДЕН РИСК</div>
+          <h3>Интензивни валежи</h3>
+          <p>Очакват се над 40 л/м² за 24 ч. в районите на Варна и Бургас. Риск от наводнения в ниските части.</p>
+          <span class="alert-time">Преди 38 мин.</span>
+        </div>
+      </div>
+
+      <div class="alert-card alert-high">
+        <div class="alert-card-icon">🌍</div>
+        <div class="alert-card-body">
+          <div class="alert-badge badge-high">ВИСОК РИСК</div>
+          <h3>Земетресение ML 3.2</h3>
+          <p>Регистрирано земетресение с магнитуд 3.2 в района на Попово. Афтершокове са възможни.</p>
+          <span class="alert-time">Преди 1 ч. 15 мин.</span>
+        </div>
+      </div>
+
+      <div class="alert-card alert-low">
+        <div class="alert-card-icon">🌡️</div>
+        <div class="alert-card-body">
+          <div class="alert-badge badge-low">ИНФОРМАЦИЯ</div>
+          <h3>Горещинна вълна</h3>
+          <p>Температури над 38°C се очакват в Южна България. Препоръчва се ограничаване на престоя навън между 12:00 и 17:00 ч.</p>
+          <span class="alert-time">Днес, 08:00</span>
+        </div>
+      </div>
+
+      <div class="alert-card alert-medium">
+        <div class="alert-card-icon">🔥</div>
+        <div class="alert-card-body">
+          <div class="alert-badge badge-medium">СРЕДЕН РИСК</div>
+          <h3>Висок риск от пожар</h3>
+          <p>Нивото на горска пожароопасност е ВИСОКО в районите на Rhodope и Странджа поради суша и силен вятър.</p>
+          <span class="alert-time">Днес, 06:30</span>
+        </div>
+      </div>
+
+      <div class="alert-card alert-low">
+        <div class="alert-card-icon">❄️</div>
+        <div class="alert-card-body">
+          <div class="alert-badge badge-low">НИСЪК РИСК</div>
+          <h3>Снежна покривка</h3>
+          <p>Над 10 см нова снежна покривка се очаква в планините над 1200 м. Проходите Шипка и Троян са с ограничен режим.</p>
+          <span class="alert-time">Вчера, 22:15</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="page-info-box">
+      <div class="info-icon">ℹ️</div>
+      <div>
+        <strong>Данните са демонстрационни.</strong> В пълната версия на платформата тук ще се показват предупреждения в реално време от НИМХ, НИМХ-БАН и европейски сеизмични мрежи.
+      </div>
+    </div>
+  </main>
+
+  <!-- Auth Modal -->
+  <div id="authModal">
+    <div id="authModalContent">
+      <button class="modal-close" onclick="closeAuth()">✕</button>
+      <div class="auth-logo">🚑 ResQ Village</div>
+      <div class="auth-tabs">
+        <button class="auth-tab active" id="tabLogin" onclick="switchTab('login')">Вход</button>
+        <button class="auth-tab" id="tabRegister" onclick="switchTab('register')">Регистрация</button>
+      </div>
+      <form id="loginForm" class="auth-form" onsubmit="doLogin(event)">
+        <div class="input-group"><span class="input-icon">👤</span><input type="text" id="loginUser" placeholder="Потребителско име" required></div>
+        <div class="input-group"><span class="input-icon">🔒</span><input type="password" id="loginPass" placeholder="Парола" required></div>
+        <button type="submit" class="btn-auth-submit">Вход</button>
+        <p class="auth-hint">Нямате акаунт? <a href="#" onclick="switchTab('register');return false;">Регистрирайте се</a></p>
+      </form>
+      <form id="registerForm" class="auth-form" style="display:none;" onsubmit="doRegister(event)">
+        <div class="input-group"><span class="input-icon">👤</span><input type="text" id="regUser" placeholder="Потребителско име" required></div>
+        <div class="input-group"><span class="input-icon">✉️</span><input type="email" id="regEmail" placeholder="Имейл" required></div>
+        <div class="input-group"><span class="input-icon">🔒</span><input type="password" id="regPass" placeholder="Парола" required></div>
+        <div class="input-group"><span class="input-icon">🔒</span><input type="password" id="regPass2" placeholder="Потвърдете паролата" required></div>
+        <button type="submit" class="btn-auth-submit">Регистрация</button>
+        <p class="auth-hint">Вече имате акаунт? <a href="#" onclick="switchTab('login');return false;">Влезте</a></p>
+      </form>
+      <p id="authMsg" class="auth-message"></p>
+    </div>
+  </div>
+
+  <script src="auth.js"></script>
+</body>
+</html>
