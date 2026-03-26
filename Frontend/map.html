@@ -9,7 +9,7 @@
 </head>
 <body>
 
-  <!-- Използваме общата навигационна лента -->
+  <!-- Навигационна лента -->
   <header class="navbar">
     <a href="index.html" class="logo">🌍 ResQ Village</a>
     <ul class="nav-links">
@@ -23,6 +23,17 @@
       </li>
       <li><a href="#">Контакти</a></li>
     </ul>
+    <div class="nav-auth">
+      <div id="authButtons">
+        <button class="btn-nav-login" onclick="openAuth('login')">🔑 Вход</button>
+        <button class="btn-nav-register" onclick="openAuth('register')">📝 Регистрация</button>
+      </div>
+      <div id="userGreeting" style="display:none;">
+        <div class="user-avatar" id="userAvatar">U</div>
+        <span id="userName"></span>
+        <button class="btn-nav-logout" onclick="logout()">Изход</button>
+      </div>
+    </div>
   </header>
 
 <div id="map"></div>
@@ -34,7 +45,35 @@
   <div class="high">● Висок</div>
 </div>
 
+<!-- Auth Modal -->
+<div id="authModal">
+  <div id="authModalContent">
+    <button class="modal-close" onclick="closeAuth()">✕</button>
+    <div class="auth-logo">🚑 ResQ Village</div>
+    <div class="auth-tabs">
+      <button class="auth-tab active" id="tabLogin" onclick="switchTab('login')">Вход</button>
+      <button class="auth-tab" id="tabRegister" onclick="switchTab('register')">Регистрация</button>
+    </div>
+    <form id="loginForm" class="auth-form" onsubmit="doLogin(event)">
+      <div class="input-group"><span class="input-icon">👤</span><input type="text" id="loginUser" placeholder="Потребителско име" required></div>
+      <div class="input-group"><span class="input-icon">🔒</span><input type="password" id="loginPass" placeholder="Парола" required></div>
+      <button type="submit" class="btn-auth-submit">Вход</button>
+      <p class="auth-hint">Нямате акаунт? <a href="#" onclick="switchTab('register');return false;">Регистрирайте се</a></p>
+    </form>
+    <form id="registerForm" class="auth-form" style="display:none;" onsubmit="doRegister(event)">
+      <div class="input-group"><span class="input-icon">👤</span><input type="text" id="regUser" placeholder="Потребителско име" required></div>
+      <div class="input-group"><span class="input-icon">✉️</span><input type="email" id="regEmail" placeholder="Имейл" required></div>
+      <div class="input-group"><span class="input-icon">🔒</span><input type="password" id="regPass" placeholder="Парола" required></div>
+      <div class="input-group"><span class="input-icon">🔒</span><input type="password" id="regPass2" placeholder="Потвърдете паролата" required></div>
+      <button type="submit" class="btn-auth-submit">Регистрация</button>
+      <p class="auth-hint">Вече имате акаунт? <a href="#" onclick="switchTab('login');return false;">Влезте</a></p>
+    </form>
+    <p id="authMsg" class="auth-message"></p>
+  </div>
+</div>
+
 <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+<script src="auth.js"></script>
 
 <script>
   // Граници на България (bounding box)
@@ -52,7 +91,7 @@
   const initialZoom = map.getZoom();
   map.setMinZoom(initialZoom);
 
-  // Карта - използваме тъмна тема на плочките, за да пасне на красивия дизайн на страницата
+  // Карта - тъмна тема
   L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
     attribution: '© OpenStreetMap contributors, © CARTO'
   }).addTo(map);
@@ -63,8 +102,7 @@
     return "#ef4444";
   }
 
-  // Бъдещо развитие: Тук ще се зареждат данни за прогноза за различни бедствия и ще се изобразяват според тяхната критичност.
-
+  // Бъдещо развитие: Тук ще се зареждат данни за бедствия.
 </script>
 
 </body>
