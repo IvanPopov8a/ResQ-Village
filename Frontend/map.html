@@ -52,15 +52,15 @@
   const initialZoom = map.getZoom();
   map.setMinZoom(initialZoom);
 
-  // Карта - използваме тъмна тема на плочките, за да пасне на красивия дизайн на страницата
-  L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-    attribution: '© OpenStreetMap contributors, © CARTO'
+  // Карта - класически светъл изглед (OpenStreetMap)
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '© OpenStreetMap contributors'
   }).addTo(map);
 
   function getColor(risk) {
-    if (risk === "low") return "#4ade80";
-    if (risk === "medium") return "#fbbf24";
-    return "#ef4444";
+    if (risk === "low") return "green";
+    if (risk === "medium") return "orange";
+    return "red";
   }
 
   // Бъдещо развитие: Тук ще се зареждат данни за прогноза за различни бедствия и ще се изобразяват според тяхната критичност.

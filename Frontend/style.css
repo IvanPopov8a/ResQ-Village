@@ -212,6 +212,6 @@ header.navbar {
   gap: 8px;
 }
 
-.low { color: #4ade80; }
-.medium { color: #fbbf24; }
-.high { color: #ef4444; }
+.low { color: green; }
+.medium { color: orange; }
+.high { color: red; }
