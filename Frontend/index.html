@@ -1,14 +1,16 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="bg">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ResQ Village - Начало</title>
+  <title>ResQ Village — Нито едно село не остава само</title>
+  <meta name="description" content="ResQ Village — интелигентна платформа за проследяване, сигнализиране и управление на бедствия в България.">
   <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="home.css">
 </head>
 <body>
 
-  <!-- Навигационна лента -->
+  <!-- Navbar -->
   <header class="navbar">
     <a href="index.html" class="logo">🌍 ResQ Village</a>
     <ul class="nav-links">
@@ -37,14 +39,68 @@
     </div>
   </header>
 
-  <!-- Главен екран -->
-  <section class="hero">
-    <h1>Бъдещето на безопасността</h1>
-    <p>ResQ Village предоставя интелигентна платформа за проследяване, прогнозиране и мониторинг на бедствия. Поддържаме общностите информирани и подготвени за извънредни ситуации.</p>
-    <a href="map.html" class="btn-primary">Отвори картата</a>
+  <!-- ══════════════════════════════════════
+       1. HERO SECTION
+  ══════════════════════════════════════ -->
+  <section class="home-hero">
+    <div class="hero-bg-orb orb1"></div>
+    <div class="hero-bg-orb orb2"></div>
+    <div class="hero-bg-orb orb3"></div>
+
+    <div class="home-hero-content fade-in">
+      <div class="hero-badge">🛡️ Платформа за защита при бедствия</div>
+      <h1 class="hero-title">ResQ Village</h1>
+      <p class="hero-subtitle">Нито едно село не остава само при бедствие</p>
+      <p class="hero-desc">
+        Следете заплахи в реално време, сигнализирайте за бедствия и намерете помощ —
+        всичко на едно място за цяла България.
+      </p>
+      <div class="hero-actions">
+        <a href="map.html" class="btn-hero-primary">🗺️ Виж картата</a>
+        <a href="reports.html" class="btn-hero-secondary">📋 Всички сигнали</a>
+      </div>
+    </div>
+
+    <div class="hero-scroll-hint">
+      <span>Превърти надолу</span>
+      <div class="scroll-arrow">↓</div>
+    </div>
   </section>
 
-  <!-- Auth Modal -->
+  <!-- ══════════════════════════════════════
+       2. БЪРЗИ СТАТИСТИКИ
+  ══════════════════════════════════════ -->
+  <section class="home-section">
+    <div class="section-label">📊 Активни сигнали</div>
+    <h2 class="section-heading">Текущо положение в България</h2>
+    <div class="stats-grid" id="statsGrid">
+      <!-- Попълва се от JS -->
+    </div>
+  </section>
+
+
+  <!-- ══════════════════════════════════════
+       4. ПОСЛЕДНИ СИГНАЛИ (Live feel)
+  ══════════════════════════════════════ -->
+  <section class="home-section">
+    <div class="section-label">🔴 Живо</div>
+    <h2 class="section-heading">Последни сигнали</h2>
+    <div class="recent-grid" id="recentGrid">
+      <!-- Попълва се от JS -->
+    </div>
+    <div class="recent-empty" id="recentEmpty" style="display:none;">
+      <div style="font-size:2.5rem;margin-bottom:12px">📭</div>
+      <p>Все още няма регистрирани сигнали.</p>
+      <a href="map.html" class="btn-hero-primary" style="margin-top:16px">Бъди първият</a>
+    </div>
+    <div style="text-align:center;margin-top:32px">
+      <a href="reports.html" class="btn-hero-secondary">Виж всички сигнали →</a>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════
+       AUTH MODAL
+  ══════════════════════════════════════ -->
   <div id="authModal">
     <div id="authModalContent">
       <button class="modal-close" onclick="closeAuth()">✕</button>
@@ -71,7 +127,197 @@
     </div>
   </div>
 
-  <script src="auth.js"></script>
+  <script>
+/* ===================== AUTH ===================== */
+function openAuth(tab) {
+  document.getElementById('authModal').style.display = 'flex';
+  switchTab(tab || 'login'); clearMsg();
+}
+function closeAuth() {
+  document.getElementById('authModal').style.display = 'none';
+  document.getElementById('loginForm').reset();
+  document.getElementById('registerForm').reset();
+  clearMsg();
+}
+function switchTab(tab) {
+  clearMsg();
+  const isLogin = tab === 'login';
+  document.getElementById('tabLogin').classList.toggle('active', isLogin);
+  document.getElementById('tabRegister').classList.toggle('active', !isLogin);
+  document.getElementById('loginForm').style.display  = isLogin ? 'flex' : 'none';
+  document.getElementById('registerForm').style.display = isLogin ? 'none' : 'flex';
+}
+function doLogin(e) {
+  e.preventDefault();
+  const username = document.getElementById('loginUser').value.trim();
+  const password = document.getElementById('loginPass').value;
+  const users = JSON.parse(localStorage.getItem('resq_users') || '[]');
+  const user  = users.find(u => u.username === username && u.password === password);
+  if (user) { loginSuccess(user.username); }
+  else { showMsg('Грешно потребителско име или парола.', 'error'); }
+}
+function doRegister(e) {
+  e.preventDefault();
+  const username = document.getElementById('regUser').value.trim();
+  const email    = document.getElementById('regEmail').value.trim();
+  const password = document.getElementById('regPass').value;
+  const confirm  = document.getElementById('regPass2').value;
+  if (password.length < 4) { showMsg('Паролата трябва да е поне 4 символа.', 'error'); return; }
+  if (password !== confirm)  { showMsg('Паролите не съвпадат.', 'error'); return; }
+  const users = JSON.parse(localStorage.getItem('resq_users') || '[]');
+  if (users.find(u => u.username === username)) { showMsg('Потребителското ime е заето.', 'error'); return; }
+  users.push({ username, email, password });
+  localStorage.setItem('resq_users', JSON.stringify(users));
+  showMsg('Регистрацията е успешна! Влизате', 'success');
+  setTimeout(() => loginSuccess(username), 1200);
+}
+function loginSuccess(username) {
+  localStorage.setItem('resq_session', username);
+  document.getElementById('authButtons').style.display  = 'none';
+  document.getElementById('userGreeting').style.display = 'flex';
+  document.getElementById('userName').textContent        = username;
+  document.getElementById('userAvatar').textContent      = username.charAt(0).toUpperCase();
+  closeAuth();
+}
+function logout() {
+  localStorage.removeItem('resq_session');
+  document.getElementById('authButtons').style.display  = 'flex';
+  document.getElementById('userGreeting').style.display = 'none';
+}
+function showMsg(text, type) {
+  const el = document.getElementById('authMsg');
+  el.textContent = text; el.className = 'auth-message ' + type;
+}
+function clearMsg() {
+  const el = document.getElementById('authMsg');
+  el.textContent = ''; el.className = 'auth-message';
+}
+document.addEventListener('DOMContentLoaded', function () {
+  document.getElementById('authModal').addEventListener('click', function(e) {
+    if (e.target === this) closeAuth();
+  });
+  const s = localStorage.getItem('resq_session');
+  if (s) {
+    document.getElementById('authButtons').style.display  = 'none';
+    document.getElementById('userGreeting').style.display = 'flex';
+    document.getElementById('userName').textContent        = s;
+    document.getElementById('userAvatar').textContent      = s.charAt(0).toUpperCase();
+  }
+});
+</script>
+  <script>
+    /* ── Page fade-in ── */
+    document.body.style.opacity = '0';
+    window.addEventListener('load', () => {
+      document.body.style.transition = 'opacity 0.8s ease';
+      document.body.style.opacity = '1';
+    });
 
+
+    /* ── Statistics ── */
+    const TYPE_LABELS = {
+      fire: '🔥 Пожари',
+      flood: '🌊 Наводнения',
+      earthquake: '🌍 Земетресения',
+      storm: '⛈️ Бури',
+      landslide: '🏔️ Свлачища',
+      other: '⚠️ Друго'
+    };
+    const TYPE_COLORS = {
+      fire: '#ef4444',
+      flood: '#3b82f6',
+      earthquake: '#f59e0b',
+      storm: '#8b5cf6',
+      landslide: '#a3a3a3',
+      other: '#fbbf24'
+    };
+
+    function renderStats() {
+      const reports = JSON.parse(localStorage.getItem('resq_reports') || '[]');
+      const grid    = document.getElementById('statsGrid');
+
+      const counts = {};
+      reports.forEach(r => { counts[r.type] = (counts[r.type] || 0) + 1; });
+
+      const total    = reports.length;
+      const verified = reports.filter(r => r.verified).length;
+      const high     = reports.filter(r => r.risk === 'high').length;
+
+      const summaryCards = [
+        { icon: '📡', value: total,    label: 'Общо сигнали',       color: '#38bdf8' },
+        { icon: '✅', value: verified, label: 'Потвърдени',          color: '#4ade80' },
+        { icon: '🔴', value: high,     label: 'Висок риск',          color: '#ef4444' },
+      ];
+
+      let html = summaryCards.map(c => `
+        <div class="stat-card">
+          <div class="stat-icon" style="color:${c.color}">${c.icon}</div>
+          <div class="stat-value" style="color:${c.color}">${c.value}</div>
+          <div class="stat-label">${c.label}</div>
+        </div>
+      `).join('');
+
+      // Per-type counts (only show types that have at least 1)
+      Object.entries(counts).forEach(([type, count]) => {
+        const color = TYPE_COLORS[type] || '#94a3b8';
+        html += `
+          <div class="stat-card">
+            <div class="stat-value" style="color:${color}">${count}</div>
+            <div class="stat-label">${TYPE_LABELS[type] || type}</div>
+          </div>
+        `;
+      });
+
+      if (total === 0) {
+        html = `<div class="stat-card stat-empty">
+          <div style="font-size:2rem;margin-bottom:8px">📭</div>
+          <div class="stat-label">Няма регистрирани сигнали</div>
+        </div>`;
+      }
+
+      grid.innerHTML = html;
+    }
+
+    /* ── Recent reports ── */
+    function renderRecent() {
+      const reports = JSON.parse(localStorage.getItem('resq_reports') || '[]');
+      const grid    = document.getElementById('recentGrid');
+      const empty   = document.getElementById('recentEmpty');
+
+      if (reports.length === 0) {
+        grid.style.display = 'none';
+        empty.style.display = 'block';
+        return;
+      }
+
+      const RISK_COLOR = { low: '#4ade80', medium: '#fbbf24', high: '#ef4444' };
+      const RISK_LABEL = { low: 'Нисък', medium: 'Среден', high: 'Висок' };
+      const TYPE_EMOJI = { fire:'🔥', flood:'🌊', earthquake:'🌍', storm:'⛈️', landslide:'🏔️', other:'⚠️' };
+      const TYPE_NAME  = { fire:'Пожар', flood:'Наводнение', earthquake:'Земетресение', storm:'Буря', landslide:'Свлачище', other:'Друго' };
+
+      const latest = [...reports].reverse().slice(0, 3);
+      grid.innerHTML = latest.map(r => {
+        const color   = RISK_COLOR[r.risk] || '#94a3b8';
+        const verified = r.verified
+          ? '<span class="recent-badge verified">✅ Потвърден</span>'
+          : '<span class="recent-badge unverified">⚠️ Непотвърден</span>';
+        return `
+          <div class="recent-card">
+            <div class="recent-card-top">
+              <span class="recent-type">${TYPE_EMOJI[r.type] || '⚠️'} ${TYPE_NAME[r.type] || r.type}</span>
+              ${verified}
+            </div>
+            <div class="recent-risk" style="color:${color}">● Риск: ${RISK_LABEL[r.risk] || r.risk}</div>
+            ${r.desc ? `<p class="recent-desc">"${r.desc}"</p>` : ''}
+            <div class="recent-meta">👤 ${r.user} &nbsp;·&nbsp; 🕐 ${r.time}</div>
+            <a href="map.html" class="recent-link">Виж на картата →</a>
+          </div>
+        `;
+      }).join('');
+    }
+
+    renderStats();
+    renderRecent();
+  </script>
 </body>
 </html>
