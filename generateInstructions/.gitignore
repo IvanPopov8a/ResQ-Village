@@ -1,0 +1,13 @@
+# Ignore environment variables (KEEP THIS SECRET!)
+file.env
+
+# Ignore Python virtual environment
+venv/
+env/
+
+# Ignore Python cache files
+__pycache__/
+*.pyc
+
+# Ignore the local SQLite database (if you don't want to upload test users)
+sql_app.db
