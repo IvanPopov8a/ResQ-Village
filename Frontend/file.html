@@ -4,52 +4,26 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>ResQ Village - Карта на България</title>
-  <style>
-    body {
-      margin: 0;
-      font-family: Arial, sans-serif;
-      background: #f4f6f9;
-    }
-
-    header {
-      background: #1e3a8a;
-      color: white;
-      padding: 15px;
-      text-align: center;
-      font-size: 24px;
-    }
-
-    #map {
-      height: 90vh;
-      width: 100%;
-    }
-
-    .legend {
-      position: absolute;
-      bottom: 20px;
-      left: 20px;
-      background: white;
-      padding: 10px;
-      border-radius: 10px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.2);
-    }
-
-    .legend div {
-      margin: 5px 0;
-    }
-
-    .low { color: green; }
-    .medium { color: orange; }
-    .high { color: red; }
-  </style>
-
+  <link rel="stylesheet" href="style.css">
   <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
 </head>
 <body>
 
-<header>
-  ResQ Village - Карта на риска в България
-</header>
+  <!-- Използваме общата навигационна лента -->
+  <header class="navbar">
+    <a href="index.html" class="logo">🌍 ResQ Village</a>
+    <ul class="nav-links">
+      <li><a href="index.html">Начало</a></li>
+      <li class="dropdown">
+        <a href="#">Платформа ▼</a>
+        <div class="dropdown-content">
+          <a href="file.html">Карта на риска</a>
+          <a href="#">(Очаквайте още страници)</a>
+        </div>
+      </li>
+      <li><a href="#">Контакти</a></li>
+    </ul>
+  </header>
 
 <div id="map"></div>
 
@@ -78,42 +52,19 @@
   const initialZoom = map.getZoom();
   map.setMinZoom(initialZoom);
 
-  // Карта
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    attribution: '© OpenStreetMap contributors'
+  // Карта - използваме тъмна тема на плочките, за да пасне на красивия дизайн на страницата
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+    attribution: '© OpenStreetMap contributors, © CARTO'
   }).addTo(map);
 
   function getColor(risk) {
-    if (risk === "low") return "green";
-    if (risk === "medium") return "orange";
-    return "red";
+    if (risk === "low") return "#4ade80";
+    if (risk === "medium") return "#fbbf24";
+    return "#ef4444";
   }
 
-  // Клик навсякъде в България → добавяне на бедствие
-  map.on('click', function(e) {
-    const risk = prompt("Въведи ниво на риск (low / medium / high):");
+  // Бъдещо развитие: Тук ще се зареждат данни за прогноза за различни бедствия и ще се изобразяват според тяхната критичност.
 
-    if (!risk) return;
-
-    const color = getColor(risk.toLowerCase());
-
-    L.circleMarker(e.latlng, {
-      radius: 8,
-      color: color,
-      fillColor: color,
-      fillOpacity: 0.7
-    })
-    .addTo(map)
-    .bindPopup(`📍 Бедствие<br>Риск: ${risk}`)
-    .openPopup();
-  });
-
-  // Примерно предупреждение
-  function showAlert() {
-    alert("⚠️ КРИТИЧНО ПРЕДУПРЕЖДЕНИЕ: Засечено бедствие в региона!");
-  }
-
-  setTimeout(showAlert, 7000);
 </script>
 
 </body>
