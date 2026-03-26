@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="bg">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ResQ Village</title>
+
+<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+
+<style>
+body {
+  margin:0;
+  font-family: 'Segoe UI', sans-serif;
+  display:flex;
+  background:#0f172a;
+  color:white;
+}
+
+#sidebar {
+  width:260px;
+  background:linear-gradient(180deg,#1e3a8a,#0f172a);
+  padding:20px;
+  box-shadow: 4px 0 15px rgba(0,0,0,0.5);
+}
+
+#sidebar h2 {
+  margin-top:0;
+  text-align:center;
+}
+
+#sidebar button {
+  width:100%;
+  padding:12px;
+  margin-top:10px;
+  border:none;
+  border-radius:10px;
+  cursor:pointer;
+  transition:0.3s;
+  font-size:14px;
+}
+
+#sidebar button:hover {
+  transform:scale(1.05);
+  opacity:0.9;
+}
+
+#map {
+  flex:1;
+  height:100vh;
+}
+
+/* Fancy buttons */
+.btn-all { background:#334155; color:white; }
+.btn-fire { background:#ef4444; }
+.btn-flood { background:#3b82f6; }
+.btn-earthquake { background:#f59e0b; }
+
+/* Modal */
+#modal {
+  display:none;
+  position:fixed;
+  top:0; left:0;
+  width:100%; height:100%;
+  background:rgba(0,0,0,0.7);
+  justify-content:center;
+  align-items:center;
+  animation:fadeIn 0.3s;
+}
+
+#modalContent {
+  background:#1e293b;
+  padding:25px;
+  border-radius:15px;
+  width:320px;
+  box-shadow:0 0 25px rgba(0,0,0,0.7);
+  animation:scaleUp 0.3s;
+}
+
+#modalContent h3 {
+  margin-top:0;
+  text-align:center;
+}
+
+select {
+  width:100%;
+  padding:10px;
+  margin-top:10px;
+  border-radius:8px;
+  border:none;
+}
+
+#saveBtn {
+  margin-top:15px;
+  padding:12px;
+  width:100%;
+  background:#22c55e;
+  border:none;
+  border-radius:10px;
+  cursor:pointer;
+  font-weight:bold;
+  transition:0.3s;
+}
+
+#saveBtn:hover {
+  background:#16a34a;
+}
+
+@keyframes fadeIn {
+  from { opacity:0; }
+  to { opacity:1; }
+}
+
+@keyframes scaleUp {
+  from { transform:scale(0.8); }
+  to { transform:scale(1); }
+}
+
+</style>
+</head>
+<body>
+
+<div id="sidebar">
+  <h2>🚑 ResQ Village</h2>
+
+  <button class="btn-all" onclick="filterType('all')">Всички</button>
+  <button class="btn-fire" onclick="filterType('fire')">🔥 Пожари</button>
+  <button class="btn-flood" onclick="filterType('flood')">🌊 Наводнения</button>
+  <button class="btn-earthquake" onclick="filterType('earthquake')">🌍 Земетресения</button>
+</div>
+
+<div id="map"></div>
+
+<div id="modal">
+  <div id="modalContent">
+    <h3>Добави бедствие</h3>
+
+    <label>Тип:</label>
+    <select id="type">
+      <option value="fire">🔥 Пожар</option>
+      <option value="flood">🌊 Наводнение</option>
+      <option value="earthquake">🌍 Земетресение</option>
+    </select>
+
+    <label>Риск:</label>
+    <select id="risk">
+      <option value="low">Low</option>
+      <option value="medium">Medium</option>
+      <option value="high">High</option>
+    </select>
+
+    <button id="saveBtn" onclick="saveDisaster()">Запази</button>
+  </div>
+</div>
+
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
+<script>
+const southWest = L.latLng(41.2, 22.3);
+const northEast = L.latLng(44.3, 28.7);
+const bounds = L.latLngBounds(southWest, northEast);
+
+const map = L.map('map', {
+  maxBounds: bounds,
+  maxBoundsViscosity: 1.0
+}).fitBounds(bounds);
+
+const initialZoom = map.getZoom();
+map.setMinZoom(initialZoom);
+
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+
+let disasters = [];
+let currentLatLng = null;
+let currentFilter = 'all';
+
+function getColor(risk) {
+  if (risk === 'low') return 'green';
+  if (risk === 'medium') return 'orange';
+  return 'red';
+}
+
+function getIcon(type) {
+  if (type === 'fire') return '🔥';
+  if (type === 'flood') return '🌊';
+  return '🌍';
+}
+
+function render() {
+  map.eachLayer(layer => {
+    if (layer instanceof L.CircleMarker) map.removeLayer(layer);
+  });
+
+  disasters.forEach(d => {
+    if (currentFilter !== 'all' && d.type !== currentFilter) return;
+
+    L.circleMarker([d.lat, d.lng], {
+      radius:10,
+      color:getColor(d.risk),
+      fillColor:getColor(d.risk),
+      fillOpacity:0.8
+    })
+    .addTo(map)
+    .bindPopup(`<b>${getIcon(d.type)} ${d.type}</b><br>Риск: ${d.risk}<br>${d.time}`);
+  });
+}
+
+map.on('click', e => {
+  currentLatLng = e.latlng;
+  document.getElementById('modal').style.display = 'flex';
+});
+
+function saveDisaster() {
+  const type = document.getElementById('type').value;
+  const risk = document.getElementById('risk').value;
+
+  disasters.push({
+    lat: currentLatLng.lat,
+    lng: currentLatLng.lng,
+    type,
+    risk,
+    time: new Date().toLocaleString()
+  });
+
+  document.getElementById('modal').style.display = 'none';
+  render();
+}
+
+function filterType(type) {
+  currentFilter = type;
+  render();
+}
+</script>
+
+</body>
+</html>
