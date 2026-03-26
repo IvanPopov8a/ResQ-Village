@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="bg">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ResQ Village - Карта на България</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+</head>
+<body>
+
+  <!-- Използваме общата навигационна лента -->
+  <header class="navbar">
+    <a href="index.html" class="logo">🌍 ResQ Village</a>
+    <ul class="nav-links">
+      <li><a href="index.html">Начало</a></li>
+      <li class="dropdown">
+        <a href="#">Платформа ▼</a>
+        <div class="dropdown-content">
+          <a href="map.html">Карта на риска</a>
+          <a href="#">(Очаквайте още страници)</a>
+        </div>
+      </li>
+      <li><a href="#">Контакти</a></li>
+    </ul>
+  </header>
+
+<div id="map"></div>
+
+<div class="legend">
+  <strong>Нива на риск:</strong>
+  <div class="low">● Нисък</div>
+  <div class="medium">● Среден</div>
+  <div class="high">● Висок</div>
+</div>
+
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
+<script>
+  // Граници на България (bounding box)
+  const southWest = L.latLng(41.2, 22.3);
+  const northEast = L.latLng(44.3, 28.7);
+  const bounds = L.latLngBounds(southWest, northEast);
+
+  // Инициализация
+  const map = L.map('map', {
+    maxBounds: bounds,
+    maxBoundsViscosity: 1.0
+  }).fitBounds(bounds);
+
+  // Забрана за zoom out извън България
+  const initialZoom = map.getZoom();
+  map.setMinZoom(initialZoom);
+
+  // Карта - използваме тъмна тема на плочките, за да пасне на красивия дизайн на страницата
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+    attribution: '© OpenStreetMap contributors, © CARTO'
+  }).addTo(map);
+
+  function getColor(risk) {
+    if (risk === "low") return "#4ade80";
+    if (risk === "medium") return "#fbbf24";
+    return "#ef4444";
+  }
+
+  // Бъдещо развитие: Тук ще се зареждат данни за прогноза за различни бедствия и ще се изобразяват според тяхната критичност.
+
+</script>
+
+</body>
+</html>
