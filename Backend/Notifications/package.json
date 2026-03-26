@@ -1,0 +1,29 @@
+{
+  "name": "resq-village-backend",
+  "version": "1.0.0",
+  "description": "ResQ Village - Backend за известия при бедствия",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "nodemon src/index.js",
+    "db:setup": "node src/db/setup.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "socket.io": "^4.6.1",
+    "web-push": "^3.6.6",
+    "twilio": "^4.19.0",
+    "pg": "^8.11.3",
+    "redis": "^4.6.10",
+    "node-cron": "^3.0.3",
+    "axios": "^1.6.2",
+    "dotenv": "^16.3.1",
+    "cors": "^2.8.5",
+    "helmet": "^7.1.0",
+    "express-rate-limit": "^7.1.5",
+    "winston": "^3.11.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.2"
+  }
+}
