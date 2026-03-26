@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="bg">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ResQ Village - Медицинска помощ</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="page.css">
+</head>
+<body>
+
+  <header class="navbar">
+    <a href="index.html" class="logo">🌍 ResQ Village</a>
+    <ul class="nav-links">
+      <li><a href="index.html">Начало</a></li>
+      <li class="dropdown">
+        <a href="#">Платформа ▼</a>
+        <div class="dropdown-content">
+          <a href="map.html">🗺️ Карта на риска</a>
+          <a href="alerts.html">🔔 Ранно предупреждение</a>
+          <a href="medical.html">🏥 Медицинска помощ</a>
+          <a href="guides.html">📖 Наръчници за оцеляване</a>
+          <a href="reports.html">📋 Всички сигнали</a>
+        </div>
+      </li>
+      <li><a href="#">Контакти</a></li>
+    </ul>
+    <div class="nav-auth">
+      <div id="authButtons">
+        <button class="btn-nav-login" onclick="openAuth('login')">🔑 Вход</button>
+        <button class="btn-nav-register" onclick="openAuth('register')">📝 Регистрация</button>
+      </div>
+      <div id="userGreeting" style="display:none;">
+        <div class="user-avatar" id="userAvatar">U</div>
+        <span id="userName"></span>
+        <button class="btn-nav-logout" onclick="logout()">Изход</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="page-main">
+    <div class="page-hero medical-hero">
+      <div class="page-hero-icon">🏥</div>
+      <h1>Медицинска помощ</h1>
+      <p>Намерете бързо най-близката болница или аптека при извънредна ситуация. Директни контакти и маршрути за спешна помощ.</p>
+    </div>
+
+    <div class="search-bar-container">
+      <div class="search-bar">
+        <span>📍</span>
+        <input type="text" placeholder="Търсете по населено място или регион…">
+        <button class="btn-search">Търси</button>
+      </div>
+    </div>
+
+    <h2 class="section-title">🏥 Болници</h2>
+    <div class="medical-grid">
+      <div class="medical-card">
+        <div class="medical-card-header hospital">
+          <span class="medical-icon">🏥</span>
+          <div>
+            <h3>УМБАЛ „Александровска"</h3>
+            <span class="medical-city">София</span>
+          </div>
+        </div>
+        <div class="medical-card-body">
+          <div class="medical-info"><span>📞</span> <a href="tel:+35929230145">+359 2 923 0145</a></div>
+          <div class="medical-info"><span>🕐</span> 24/7 Спешно отделение</div>
+          <div class="medical-info"><span>📏</span> Многопрофилна университетска болница</div>
+        </div>
+        <a href="https://www.maps.google.com/?q=УМБАЛ+Александровска+София" target="_blank" class="btn-directions">🧭 Маршрут</a>
+      </div>
+
+      <div class="medical-card">
+        <div class="medical-card-header hospital">
+          <span class="medical-icon">🏥</span>
+          <div>
+            <h3>УМБАЛ „Св. Георги"</h3>
+            <span class="medical-city">Пловдив</span>
+          </div>
+        </div>
+        <div class="medical-card-body">
+          <div class="medical-info"><span>📞</span> <a href="tel:+35932602968">+359 32 602 968</a></div>
+          <div class="medical-info"><span>🕐</span> 24/7 Спешно отделение</div>
+          <div class="medical-info"><span>📏</span> Многопрофилна университетска болница</div>
+        </div>
+        <a href="https://www.maps.google.com/?q=УМБАЛ+Свети+Георги+Пловдив" target="_blank" class="btn-directions">🧭 Маршрут</a>
+      </div>
+
+      <div class="medical-card">
+        <div class="medical-card-header hospital">
+          <span class="medical-icon">🏥</span>
+          <div>
+            <h3>МБАЛ „Варна"</h3>
+            <span class="medical-city">Варна</span>
+          </div>
+        </div>
+        <div class="medical-card-body">
+          <div class="medical-info"><span>📞</span> <a href="tel:+35952300940">+359 52 300 940</a></div>
+          <div class="medical-info"><span>🕐</span> 24/7 Спешно отделение</div>
+          <div class="medical-info"><span>📏</span> Многопрофилна областна болница</div>
+        </div>
+        <a href="https://www.maps.google.com/?q=МБАЛ+Варна" target="_blank" class="btn-directions">🧭 Маршрут</a>
+      </div>
+    </div>
+
+    <h2 class="section-title">🚑 Спешни номера</h2>
+    <div class="emergency-grid">
+      <div class="emergency-card">
+        <div class="emergency-number">112</div>
+        <div class="emergency-label">Единен европейски номер за спешна помощ</div>
+      </div>
+      <div class="emergency-card">
+        <div class="emergency-number">150</div>
+        <div class="emergency-label">Спешна медицинска помощ (ЦСМП)</div>
+      </div>
+      <div class="emergency-card">
+        <div class="emergency-number">160</div>
+        <div class="emergency-label">Пожарна и защита при бедствия</div>
+      </div>
+      <div class="emergency-card">
+        <div class="emergency-number">166</div>
+        <div class="emergency-label">Полиция</div>
+      </div>
+    </div>
+
+    <div class="page-info-box">
+      <div class="info-icon">ℹ️</div>
+      <div>
+        <strong>В пълната версия</strong> ще се използва геолокация за намиране на <em>най-близките</em> болници и аптеки до вашата текуща позиция с оптимизирани маршрути.
+      </div>
+    </div>
+  </main>
+
+  <!-- Auth Modal -->
+  <div id="authModal">
+    <div id="authModalContent">
+      <button class="modal-close" onclick="closeAuth()">✕</button>
+      <div class="auth-logo">🚑 ResQ Village</div>
+      <div class="auth-tabs">
+        <button class="auth-tab active" id="tabLogin" onclick="switchTab('login')">Вход</button>
+        <button class="auth-tab" id="tabRegister" onclick="switchTab('register')">Регистрация</button>
+      </div>
+      <form id="loginForm" class="auth-form" onsubmit="doLogin(event)">
+        <div class="input-group"><span class="input-icon">👤</span><input type="text" id="loginUser" placeholder="Потребителско име" required></div>
+        <div class="input-group"><span class="input-icon">🔒</span><input type="password" id="loginPass" placeholder="Парола" required></div>
+        <button type="submit" class="btn-auth-submit">Вход</button>
+      </form>
+      <form id="registerForm" class="auth-form" style="display:none;" onsubmit="doRegister(event)">
+        <div class="input-group"><span class="input-icon">👤</span><input type="text" id="regUser" placeholder="Потребителско име" required></div>
+        <div class="input-group"><span class="input-icon">✉️</span><input type="email" id="regEmail" placeholder="Имейл" required></div>
+        <div class="input-group"><span class="input-icon">🔒</span><input type="password" id="regPass" placeholder="Парола" required></div>
+        <div class="input-group"><span class="input-icon">🔒</span><input type="password" id="regPass2" placeholder="Потвърдете паролата" required></div>
+        <button type="submit" class="btn-auth-submit">Регистрация</button>
+      </form>
+      <p id="authMsg" class="auth-message"></p>
+    </div>
+  </div>
+
+  <script src="auth.js"></script>
+</body>
+</html>

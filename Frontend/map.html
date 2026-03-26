@@ -17,8 +17,11 @@
       <li class="dropdown">
         <a href="#">Платформа ▼</a>
         <div class="dropdown-content">
-          <a href="map.html">Карта на риска</a>
-          <a href="#">(Очаквайте още страници)</a>
+          <a href="map.html">🗺️ Карта на риска</a>
+          <a href="alerts.html">🔔 Ранно предупреждение</a>
+          <a href="medical.html">🏥 Медицинска помощ</a>
+          <a href="guides.html">📖 Наръчници за оцеляване</a>
+          <a href="reports.html">📋 Всички сигнали</a>
         </div>
       </li>
       <li><a href="#">Контакти</a></li>
@@ -176,7 +179,7 @@
   const BLOCK_RADIUS  = 0.018;           // ~2 km in degrees
 
   // Render existing reports on load
-  reports.forEach(r => addMarker(r));
+  reports.forEach((r, i) => addMarker(r, i));
 
   /* --- Anti-spam helpers --- */
   function canReport(username) {
@@ -283,6 +286,7 @@
       lng: reportLatLng.lng,
       type, risk, desc, user,
       verified: false,
+      confirmations: [],       // array of usernames who confirmed
       time: new Date().toLocaleString('bg-BG')
     };
 
@@ -291,7 +295,7 @@
     stampReport(user);
 
     if (tempMarker) { map.removeLayer(tempMarker); tempMarker = null; }
-    addMarker(report);
+    addMarker(report, reports.length - 1);
 
     document.getElementById('reportType').value = 'fire';
     document.getElementById('reportRisk').value = 'low';
@@ -318,7 +322,8 @@
     t._timeout = setTimeout(() => { t.style.opacity = '0'; }, 3500);
   }
 
-  function addMarker(r) {
+  /* ── Marker rendering (with confirm button) ── */
+  function addMarker(r, index) {
     const color = getColor(r.risk);
     const marker = L.circleMarker([r.lat, r.lng], {
       radius: 10,
@@ -329,20 +334,90 @@
       className: r.risk === 'high' ? 'pulse-marker' : ''
     }).addTo(map);
 
+    // Store marker reference on the report object so we can refresh its popup
+    r._marker = marker;
+
+    marker.bindPopup(buildPopup(r, index));
+  }
+
+  function buildPopup(r, index) {
+    const color       = getColor(r.risk);
+    const confirmCount = (r.confirmations || []).length;
+    const VERIFY_THRESHOLD = 3;
+
     const verifiedBadge = r.verified
-      ? '<span style="color:#4ade80">✅ Потвърден</span>'
-      : '<span style="color:#fbbf24">⚠️ Непотвърден</span>';
-    const popup = `
-      <div style="font-family:Outfit,sans-serif; min-width:180px;">
-        <strong>${getEmoji(r.type)} ${getLabel(r.type)}</strong><br>
+      ? '<span style="color:#4ade80;font-weight:700">✅ Потвърден</span>'
+      : `<span style="color:#fbbf24">⚠️ Непотвърден</span>`;
+
+    const progressBar = !r.verified ? `
+      <div style="margin:6px 0;background:rgba(255,255,255,0.08);border-radius:20px;height:6px;width:100%;">
+        <div style="height:6px;border-radius:20px;background:linear-gradient(90deg,#fbbf24,#f59e0b);width:${Math.min(100, (confirmCount/VERIFY_THRESHOLD)*100)}%"></div>
+      </div>
+      <small style="color:#64748b">${confirmCount}/${VERIFY_THRESHOLD} потвърждения</small>` : '';
+
+    const currentUser = localStorage.getItem('resq_session');
+    let confirmBtn = '';
+    if (currentUser && currentUser !== r.user && !r.verified) {
+      const alreadyConfirmed = (r.confirmations || []).includes(currentUser);
+      if (alreadyConfirmed) {
+        confirmBtn = `<div style="margin-top:10px;padding:8px;background:rgba(99,102,241,0.1);border:1px solid rgba(99,102,241,0.2);border-radius:8px;font-size:0.8rem;color:#818cf8;text-align:center">
+          ✔ Вече потвърди този сигнал
+        </div>`;
+      } else {
+        confirmBtn = `<button onclick="verifyReport(${index})" style="
+          margin-top:10px;width:100%;padding:9px;
+          background:linear-gradient(135deg,#4f46e5,#818cf8);
+          border:none;border-radius:9px;color:white;
+          font-family:Outfit,sans-serif;font-size:0.85rem;font-weight:700;
+          cursor:pointer;transition:filter 0.2s;
+        " onmouseover="this.style.filter='brightness(1.15)'" onmouseout="this.style.filter='none'">
+          👍 Потвърди сигнала
+        </button>`;
+      }
+    }
+
+    return `
+      <div style="font-family:Outfit,sans-serif;min-width:200px;padding:2px 0">
+        <strong style="font-size:1rem">${getEmoji(r.type)} ${getLabel(r.type)}</strong><br>
         <span style="color:${color}">● Риск: ${r.risk === 'low' ? 'Нисък' : r.risk === 'medium' ? 'Среден' : 'Висок'}</span><br>
         ${verifiedBadge}<br>
-        ${r.desc ? '<em>"' + r.desc + '"</em><br>' : ''}
-        <small>👤 ${r.user} — ${r.time}</small>
+        ${progressBar}
+        ${r.desc ? `<em style="display:block;margin-top:6px;color:#94a3b8">"${r.desc}"</em>` : ''}
+        <small style="color:#475569;display:block;margin-top:6px">👤 ${r.user} — ${r.time}</small>
+        ${confirmBtn}
       </div>
     `;
-    marker.bindPopup(popup);
   }
+
+  /* ── Verification logic ── */
+  function verifyReport(index) {
+    const currentUser = localStorage.getItem('resq_session');
+    if (!currentUser) { openAuth('login'); return; }
+
+    const r = reports[index];
+    if (!r) return;
+    if (r.user === currentUser) return; // can't self-verify
+    if ((r.confirmations || []).includes(currentUser)) return; // already confirmed
+
+    r.confirmations = r.confirmations || [];
+    r.confirmations.push(currentUser);
+
+    if (r.confirmations.length >= 3) {
+      r.verified = true;
+      showToast('✅ Сигналът е потвърден от общността!', 'ok');
+    } else {
+      showToast(`👍 Потвърждение добавено (${r.confirmations.length}/3)`, 'ok');
+    }
+
+    // Persist
+    localStorage.setItem('resq_reports', JSON.stringify(reports));
+
+    // Refresh popup content live
+    if (r._marker) {
+      r._marker.setPopupContent(buildPopup(r, index));
+    }
+  }
+
 </script>
 
 </body>

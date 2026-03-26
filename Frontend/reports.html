@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="bg">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ResQ Village - Всички сигнали</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="page.css">
+</head>
+<body>
+
+  <header class="navbar">
+    <a href="index.html" class="logo">🌍 ResQ Village</a>
+    <ul class="nav-links">
+      <li><a href="index.html">Начало</a></li>
+      <li class="dropdown">
+        <a href="#">Платформа ▼</a>
+        <div class="dropdown-content">
+          <a href="map.html">🗺️ Карта на риска</a>
+          <a href="alerts.html">🔔 Ранно предупреждение</a>
+          <a href="medical.html">🏥 Медицинска помощ</a>
+          <a href="guides.html">📖 Наръчници за оцеляване</a>
+          <a href="reports.html">📋 Всички сигнали</a>
+        </div>
+      </li>
+      <li><a href="#">Контакти</a></li>
+    </ul>
+    <div class="nav-auth">
+      <div id="authButtons">
+        <button class="btn-nav-login" onclick="openAuth('login')">🔑 Вход</button>
+        <button class="btn-nav-register" onclick="openAuth('register')">📝 Регистрация</button>
+      </div>
+      <div id="userGreeting" style="display:none;">
+        <div class="user-avatar" id="userAvatar">U</div>
+        <span id="userName"></span>
+        <button class="btn-nav-logout" onclick="logout()">Изход</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="page-main">
+    <div class="page-hero reports-hero">
+      <div class="page-hero-icon">📋</div>
+      <h1>Всички сигнали</h1>
+      <p>Преглед на всички подадени сигнали от общността — с филтриране по тип, риск и дата.</p>
+    </div>
+
+    <div class="reports-toolbar">
+      <select id="filterType" class="report-filter-select" onchange="renderReports()">
+        <option value="all">Всички типове</option>
+        <option value="fire">🔥 Пожар</option>
+        <option value="flood">🌊 Наводнение</option>
+        <option value="earthquake">🌍 Земетресение</option>
+        <option value="storm">⛈️ Буря</option>
+        <option value="landslide">🏔️ Свлачище</option>
+        <option value="other">⚠️ Друго</option>
+      </select>
+      <select id="filterRisk" class="report-filter-select" onchange="renderReports()">
+        <option value="all">Всички рискове</option>
+        <option value="low">🟢 Нисък</option>
+        <option value="medium">🟡 Среден</option>
+        <option value="high">🔴 Висок</option>
+      </select>
+      <button class="btn-clear-reports" onclick="clearAllReports()">🗑️ Изчисти всички</button>
+    </div>
+
+    <div id="reportsList" class="reports-list">
+      <div class="reports-empty">📭 Няма подадени сигнали. <a href="map.html">Отиди на картата</a>, за да добавиш.</div>
+    </div>
+  </main>
+
+  <!-- Auth Modal -->
+  <div id="authModal">
+    <div id="authModalContent">
+      <button class="modal-close" onclick="closeAuth()">✕</button>
+      <div class="auth-logo">🚑 ResQ Village</div>
+      <div class="auth-tabs">
+        <button class="auth-tab active" id="tabLogin" onclick="switchTab('login')">Вход</button>
+        <button class="auth-tab" id="tabRegister" onclick="switchTab('register')">Регистрация</button>
+      </div>
+      <form id="loginForm" class="auth-form" onsubmit="doLogin(event)">
+        <div class="input-group"><span class="input-icon">👤</span><input type="text" id="loginUser" placeholder="Потребителско име" required></div>
+        <div class="input-group"><span class="input-icon">🔒</span><input type="password" id="loginPass" placeholder="Парола" required></div>
+        <button type="submit" class="btn-auth-submit">Вход</button>
+      </form>
+      <form id="registerForm" class="auth-form" style="display:none;" onsubmit="doRegister(event)">
+        <div class="input-group"><span class="input-icon">👤</span><input type="text" id="regUser" placeholder="Потребителско ime" required></div>
+        <div class="input-group"><span class="input-icon">✉️</span><input type="email" id="regEmail" placeholder="Имейл" required></div>
+        <div class="input-group"><span class="input-icon">🔒</span><input type="password" id="regPass" placeholder="Парола" required></div>
+        <div class="input-group"><span class="input-icon">🔒</span><input type="password" id="regPass2" placeholder="Потвърдете паролата" required></div>
+        <button type="submit" class="btn-auth-submit">Регистрация</button>
+      </form>
+      <p id="authMsg" class="auth-message"></p>
+    </div>
+  </div>
+
+  <script src="auth.js"></script>
+  <script>
+    const EMOJIS  = { fire:'🔥', flood:'🌊', earthquake:'🌍', storm:'⛈️', landslide:'🏔️', other:'⚠️' };
+    const LABELS  = { fire:'Пожар', flood:'Наводнение', earthquake:'Земетресение', storm:'Буря', landslide:'Свлачище', other:'Друго' };
+    const RISKS   = { low:'🟢 Нисък', medium:'🟡 Среден', high:'🔴 Висок' };
+    const RCOLORS = { low:'#4ade80', medium:'#fbbf24', high:'#ef4444' };
+
+    function renderReports() {
+      const typeF = document.getElementById('filterType').value;
+      const riskF = document.getElementById('filterRisk').value;
+      const list  = document.getElementById('reportsList');
+      let reports = JSON.parse(localStorage.getItem('resq_reports') || '[]');
+
+      if (typeF !== 'all') reports = reports.filter(r => r.type === typeF);
+      if (riskF !== 'all') reports = reports.filter(r => r.risk === riskF);
+
+      // Sort newest first
+      reports = [...reports].reverse();
+
+      if (reports.length === 0) {
+        list.innerHTML = '<div class="reports-empty">📭 Няма сигнали, отговарящи на филтъра. <a href="map.html">Добави сигнал</a></div>';
+        return;
+      }
+
+      list.innerHTML = reports.map((r, i) => `
+        <div class="report-row">
+          <div class="report-row-icon">${EMOJIS[r.type] || '⚠️'}</div>
+          <div class="report-row-body">
+            <div class="report-row-title">${EMOJIS[r.type]} ${LABELS[r.type] || r.type}</div>
+            <div class="report-row-risk" style="color:${RCOLORS[r.risk]}">${RISKS[r.risk] || r.risk}</div>
+            ${r.desc ? `<div class="report-row-desc">"${r.desc}"</div>` : ''}
+            <div class="report-row-meta">👤 ${r.user} &nbsp;·&nbsp; 🕐 ${r.time} &nbsp;·&nbsp; 📍 ${r.lat.toFixed(3)}, ${r.lng.toFixed(3)}</div>
+          </div>
+          <a class="report-row-map" href="map.html" title="Виж на картата">🗺️</a>
+        </div>
+      `).join('');
+    }
+
+    function clearAllReports() {
+      if (confirm('Сигурен ли си, че искаш да изтриеш всички сигнали?')) {
+        localStorage.removeItem('resq_reports');
+        renderReports();
+      }
+    }
+
+    renderReports();
+  </script>
+</body>
+</html>

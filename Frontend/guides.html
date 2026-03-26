@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="bg">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ResQ Village - Наръчници за оцеляване</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="page.css">
+</head>
+<body>
+
+  <header class="navbar">
+    <a href="index.html" class="logo">🌍 ResQ Village</a>
+    <ul class="nav-links">
+      <li><a href="index.html">Начало</a></li>
+      <li class="dropdown">
+        <a href="#">Платформа ▼</a>
+        <div class="dropdown-content">
+          <a href="map.html">🗺️ Карта на риска</a>
+          <a href="alerts.html">🔔 Ранно предупреждение</a>
+          <a href="medical.html">🏥 Медицинска помощ</a>
+          <a href="guides.html">📖 Наръчници за оцеляване</a>
+          <a href="reports.html">📋 Всички сигнали</a>
+        </div>
+      </li>
+      <li><a href="#">Контакти</a></li>
+    </ul>
+    <div class="nav-auth">
+      <div id="authButtons">
+        <button class="btn-nav-login" onclick="openAuth('login')">🔑 Вход</button>
+        <button class="btn-nav-register" onclick="openAuth('register')">📝 Регистрация</button>
+      </div>
+      <div id="userGreeting" style="display:none;">
+        <div class="user-avatar" id="userAvatar">U</div>
+        <span id="userName"></span>
+        <button class="btn-nav-logout" onclick="logout()">Изход</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="page-main">
+    <div class="page-hero guides-hero">
+      <div class="page-hero-icon">📖</div>
+      <h1>Наръчници за оцеляване</h1>
+      <p>Стъпка по стъпка инструкции за различни извънредни ситуации, написани на ясен и разбираем език — за всички, включително деца и възрастни.</p>
+    </div>
+
+    <div class="guides-grid">
+
+      <div class="guide-card" onclick="toggleGuide(this)">
+        <div class="guide-card-header">
+          <span class="guide-icon">🔥</span>
+          <div>
+            <h3>При пожар</h3>
+            <span class="guide-tag">Основен</span>
+          </div>
+          <span class="guide-arrow">▼</span>
+        </div>
+        <div class="guide-steps">
+          <div class="guide-step"><span class="step-num">1</span><span>Обадете се незабавно на <strong>112</strong></span></div>
+          <div class="guide-step"><span class="step-num">2</span><span>Напуснете сградата — не използвайте асансьор</span></div>
+          <div class="guide-step"><span class="step-num">3</span><span>Покрийте носа и устата с мокра кърпа</span></div>
+          <div class="guide-step"><span class="step-num">4</span><span>Пълзете ниско, следвайте означени изходи</span></div>
+          <div class="guide-step"><span class="step-num">5</span><span>Не се връщайте за вещи — животът е по-важен</span></div>
+          <div class="guide-step"><span class="step-num">6</span><span>Съберете се на предварително уговорено място</span></div>
+        </div>
+      </div>
+
+      <div class="guide-card" onclick="toggleGuide(this)">
+        <div class="guide-card-header">
+          <span class="guide-icon">🌊</span>
+          <div>
+            <h3>При наводнение</h3>
+            <span class="guide-tag">Основен</span>
+          </div>
+          <span class="guide-arrow">▼</span>
+        </div>
+        <div class="guide-steps">
+          <div class="guide-step"><span class="step-num">1</span><span>Преместете се на по-високо ниво незабавно</span></div>
+          <div class="guide-step"><span class="step-num">2</span><span>Изключете електричеството от главния прекъсвач</span></div>
+          <div class="guide-step"><span class="step-num">3</span><span>Не навлизайте в наводнени зони с кола или пеша</span></div>
+          <div class="guide-step"><span class="step-num">4</span><span>Вземете вода, храна и важни документи</span></div>
+          <div class="guide-step"><span class="step-num">5</span><span>Следвайте указанията на властите</span></div>
+        </div>
+      </div>
+
+      <div class="guide-card" onclick="toggleGuide(this)">
+        <div class="guide-card-header">
+          <span class="guide-icon">🌍</span>
+          <div>
+            <h3>При земетресение</h3>
+            <span class="guide-tag">Основен</span>
+          </div>
+          <span class="guide-arrow">▼</span>
+        </div>
+        <div class="guide-steps">
+          <div class="guide-step"><span class="step-num">1</span><span><strong>Падни — Прикрий се — Задръж се</strong> (Duck, Cover, Hold)</span></div>
+          <div class="guide-step"><span class="step-num">2</span><span>Стой под маса или до вътрешна стена</span></div>
+          <div class="guide-step"><span class="step-num">3</span><span>Стой далеч от прозорци и шкафове</span></div>
+          <div class="guide-step"><span class="step-num">4</span><span>Не излизай по стълбищата докато трусът продължава</span></div>
+          <div class="guide-step"><span class="step-num">5</span><span>След труса — проверете за наранявания и газови течове</span></div>
+          <div class="guide-step"><span class="step-num">6</span><span>Очаквайте афтершокове и останете нащрек</span></div>
+        </div>
+      </div>
+
+      <div class="guide-card" onclick="toggleGuide(this)">
+        <div class="guide-card-header">
+          <span class="guide-icon">⛈️</span>
+          <div>
+            <h3>При буря и гръмотевична буря</h3>
+            <span class="guide-tag">Времето</span>
+          </div>
+          <span class="guide-arrow">▼</span>
+        </div>
+        <div class="guide-steps">
+          <div class="guide-step"><span class="step-num">1</span><span>Влезте в сграда или кола веднага</span></div>
+          <div class="guide-step"><span class="step-num">2</span><span>Стойте далеч от дървета, стълбове и открити полета</span></div>
+          <div class="guide-step"><span class="step-num">3</span><span>Изключете електрически уреди и избягвайте вани</span></div>
+          <div class="guide-step"><span class="step-num">4</span><span>Ако сте навън — клекнете на земята, не лягайте</span></div>
+          <div class="guide-step"><span class="step-num">5</span><span>Изчакайте 30 мин. след последния гръм преди да излезете</span></div>
+        </div>
+      </div>
+
+      <div class="guide-card" onclick="toggleGuide(this)">
+        <div class="guide-card-header">
+          <span class="guide-icon">🏔️</span>
+          <div>
+            <h3>При свлачище</h3>
+            <span class="guide-tag">Природни бедствия</span>
+          </div>
+          <span class="guide-arrow">▼</span>
+        </div>
+        <div class="guide-steps">
+          <div class="guide-step"><span class="step-num">1</span><span>Евакуирайте се веднага при признаци (пукнатини, шум)</span></div>
+          <div class="guide-step"><span class="step-num">2</span><span>Движете се перпендикулярно на посоката на свлачището</span></div>
+          <div class="guide-step"><span class="step-num">3</span><span>Не се връщайте в засегнатия район</span></div>
+          <div class="guide-step"><span class="step-num">4</span><span>Обадете се на 112 и информирайте за пострадали</span></div>
+        </div>
+      </div>
+
+      <div class="guide-card" onclick="toggleGuide(this)">
+        <div class="guide-card-header">
+          <span class="guide-icon">🎒</span>
+          <div>
+            <h3>Аварийна чанта — какво да включите</h3>
+            <span class="guide-tag">Подготовка</span>
+          </div>
+          <span class="guide-arrow">▼</span>
+        </div>
+        <div class="guide-steps">
+          <div class="guide-step"><span class="step-num">💧</span><span>Вода — минимум 2 литра на човек на ден</span></div>
+          <div class="guide-step"><span class="step-num">🍫</span><span>Храна за 3 дни (консерви, енергийни блокчета)</span></div>
+          <div class="guide-step"><span class="step-num">💊</span><span>Аптечка и лични медикаменти</span></div>
+          <div class="guide-step"><span class="step-num">🔦</span><span>Фенер и резервни батерии</span></div>
+          <div class="guide-step"><span class="step-num">📄</span><span>Копия на важни документи в непромокаем плик</span></div>
+          <div class="guide-step"><span class="step-num">📻</span><span>Радio с батерии или ръкохватка за новини</span></div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- Auth Modal -->
+  <div id="authModal">
+    <div id="authModalContent">
+      <button class="modal-close" onclick="closeAuth()">✕</button>
+      <div class="auth-logo">🚑 ResQ Village</div>
+      <div class="auth-tabs">
+        <button class="auth-tab active" id="tabLogin" onclick="switchTab('login')">Вход</button>
+        <button class="auth-tab" id="tabRegister" onclick="switchTab('register')">Регистрация</button>
+      </div>
+      <form id="loginForm" class="auth-form" onsubmit="doLogin(event)">
+        <div class="input-group"><span class="input-icon">👤</span><input type="text" id="loginUser" placeholder="Потребителско име" required></div>
+        <div class="input-group"><span class="input-icon">🔒</span><input type="password" id="loginPass" placeholder="Парола" required></div>
+        <button type="submit" class="btn-auth-submit">Вход</button>
+      </form>
+      <form id="registerForm" class="auth-form" style="display:none;" onsubmit="doRegister(event)">
+        <div class="input-group"><span class="input-icon">👤</span><input type="text" id="regUser" placeholder="Потребителско име" required></div>
+        <div class="input-group"><span class="input-icon">✉️</span><input type="email" id="regEmail" placeholder="Имейл" required></div>
+        <div class="input-group"><span class="input-icon">🔒</span><input type="password" id="regPass" placeholder="Парола" required></div>
+        <div class="input-group"><span class="input-icon">🔒</span><input type="password" id="regPass2" placeholder="Потвърдете паролата" required></div>
+        <button type="submit" class="btn-auth-submit">Регистрация</button>
+      </form>
+      <p id="authMsg" class="auth-message"></p>
+    </div>
+  </div>
+
+  <script src="auth.js"></script>
+  <script>
+    function toggleGuide(card) {
+      card.classList.toggle('open');
+    }
+  </script>
+</body>
+</html>
