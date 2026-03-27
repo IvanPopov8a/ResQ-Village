@@ -18,9 +18,7 @@
       <li class="dropdown">
         <a href="#">Услуги ≡</a>
         <div class="dropdown-content">
-          <a href="map.html">Карта на риска</a>
-          <a href="alerts.html">Ранно предупреждение</a>
-          <a href="medical.html">Медицинска помощ</a>
+          <a href="map.html">Карта</a>
           <a href="guides.html">Наръчници за оцеляване</a>
           <a href="reports.html">Всички сигнали</a>
         </div>
@@ -129,12 +127,48 @@
       <button type="submit" class="btn-auth-submit">Регистрация</button>
       <p class="auth-hint">Вече имате акаунт? <a href="#" onclick="switchTab('login');return false;">Влезте</a></p>
     </form>
-    <p id="authMsg" class="auth-message"></p>
+  <div id="authMsg" class="auth-message"></div>
+  </div>
+</div>
+
+<!-- Map Sidebar -->
+<div id="mapSidebar" class="map-sidebar">
+  <button class="sidebar-toggle-btn" id="sidebarToggle" onclick="toggleSidebar()" title="Отвори/Затвори менюто">☰</button>
+  <div class="sidebar-inner">
+    <div class="sidebar-tabs">
+      <button class="sidebar-tab active" id="tabAlerts" onclick="switchSidebarTab('alerts')">⚠️ Сигнали</button>
+      <button class="sidebar-tab" id="tabMedical" onclick="switchSidebarTab('medical')">🩺 Болници</button>
+    </div>
+    
+    <div id="sectionAlerts" class="sidebar-section active">
+      <div class="sidebar-header">
+        <h3>Ранно предупреждение</h3>
+        <p>Актуални заплахи и предупреждения в реално време.</p>
+      </div>
+      <div id="alertsList" class="sidebar-list">
+        <div class="list-loading">Зареждане на сигнали...</div>
+      </div>
+    </div>
+    
+    <div id="sectionMedical" class="sidebar-section">
+      <div class="sidebar-header">
+        <h3>Медицинска помощ</h3>
+        <p>Намерете болници и аптеки в избрания регион.</p>
+      </div>
+      <div class="sidebar-search">
+        <input type="text" id="medicalSearch" placeholder="Град (напр. Плевен, Пловдив)..." onkeydown="if(event.key==='Enter') searchHospitalsInCity()">
+        <button onclick="searchHospitalsInCity()">🔍</button>
+      </div>
+      <div id="hospitalList" class="sidebar-list">
+        <div class="list-empty">Търсете град, за да видите болниците в него.</div>
+      </div>
+    </div>
   </div>
 </div>
 
 <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 <script src="auth.js"></script>
+<script src="medical-api.js"></script>
 <script src="map.js"></script>
 <script src="risk-map.js"></script>
 
