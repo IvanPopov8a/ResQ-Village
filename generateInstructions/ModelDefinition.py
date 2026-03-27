@@ -4,7 +4,8 @@ import json
 import math
 from typing import List, Optional
 
-import google.generativeai as genai
+from google import genai
+from google.genai import types
 from pydantic import BaseModel, Field
 from dotenv import load_dotenv
 
@@ -25,13 +26,13 @@ from Disaster_algorythm.disaster_probability import (
 # ---------------------------------------------------------------------------
 # Gemini configuration
 # ---------------------------------------------------------------------------
-load_dotenv(dotenv_path=os.path.join(_HERE, "file.env"))
+load_dotenv(dotenv_path=os.path.join(_HERE, ".env"))
 
 api_key = os.getenv("GEMINI_API_KEY")
 if not api_key:
-    raise ValueError("GEMINI_API_KEY is not set in generateInstructions/file.env")
+    raise ValueError("GEMINI_API_KEY is not set in generateInstructions/.env")
 
-genai.configure(api_key=api_key)
+_client = genai.Client(api_key=api_key)
 
 
 # ---------------------------------------------------------------------------
@@ -180,7 +181,6 @@ def generate_survival_guide(alert_data: DisasterAlertRequest) -> SurvivalInstruc
     Kept for backwards compatibility.
     """
     print(f"[AI] Generating guide for {alert_data.village_name}…")
-    model = genai.GenerativeModel("gemini-2.5-flash")
 
     prompt = f"""
 You are an expert emergency response AI for the 'ResQ Village' platform in Bulgaria.
@@ -211,9 +211,10 @@ Return ONLY valid JSON (no Markdown):
 }}
 """
     try:
-        response = model.generate_content(
-            prompt,
-            generation_config=genai.GenerationConfig(
+        response = _client.models.generate_content(
+            model="gemini-2.5-flash",
+            contents=prompt,
+            config=types.GenerateContentConfig(
                 response_mime_type="application/json",
                 temperature=0.2,
             ),
@@ -276,8 +277,6 @@ def generate_location_aware_guide(
     )
 
     # ── Step 2: Call Gemini with full geospatial context ───────────────────
-    model = genai.GenerativeModel("gemini-2.5-flash")
-
     prompt = f"""
 You are an expert emergency response AI for the 'ResQ Village' platform in Bulgaria.
 Generate clear, life-saving evacuation instructions for people in Bulgarian rural areas.
@@ -317,9 +316,10 @@ Return ONLY valid JSON (no Markdown):
 """
 
     try:
-        response = model.generate_content(
-            prompt,
-            generation_config=genai.GenerationConfig(
+        response = _client.models.generate_content(
+            model="gemini-2.5-flash",
+            contents=prompt,
+            config=types.GenerateContentConfig(
                 response_mime_type="application/json",
                 temperature=0.2,
             ),

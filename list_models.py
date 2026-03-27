@@ -1,17 +1,19 @@
 import os
 from dotenv import load_dotenv
-import google.generativeai as genai
+from google import genai
 
-load_dotenv("generateInstructions/file.env")
+load_dotenv("generateInstructions/.env")
 api_key = os.getenv("GEMINI_API_KEY")
 print(f"Key loaded: {bool(api_key)}")
 
 if api_key:
-    genai.configure(api_key=api_key)
+    client = genai.Client(api_key=api_key)
     try:
-        models = genai.list_models()
+        models = client.models.list()
         for m in models:
-            if "generateContent" in m.supported_generation_methods:
+            if hasattr(m, "supported_actions") and "generateContent" in (m.supported_actions or []):
+                print(m.name)
+            elif hasattr(m, "name"):
                 print(m.name)
     except Exception as e:
         print(f"Error: {e}")
