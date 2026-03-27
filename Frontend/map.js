@@ -195,14 +195,67 @@ function addMarker(r, index) {
   const emoji = { fire:'🔥', flood:'🌊', earthquake:'🌍', storm:'⛈️', landslide:'🏔️', other:'⚠️' }[r.type] || '⚠️';
   const label = { fire:'Пожар', flood:'Наводнение', earthquake:'Земетресение', storm:'Буря', landslide:'Свлачище', other:'Друго' }[r.type] || r.type;
   
+  const currentUser = localStorage.getItem('resq_session');
+  // Check if current user has already confirmed
+  const hasConfirmed = r.confirmations && currentUser && r.confirmations.includes(currentUser);
+  const isAuthor = r.user === currentUser;
+
+  let verifyBtn = '';
+  if (r.verified) {
+    verifyBtn = '<div class="verified-badge-popup"> ✅ Потвърден</div>';
+  } else if (currentUser && !isAuthor && !hasConfirmed) {
+    verifyBtn = `
+      <div style="margin-top:10px; text-align:center;">
+        <button class="btn-verify-report" onclick="verifyReport(${index})">Потвърди сигнала</button>
+        <div style="font-size:10px; color:#94a3b8; margin-top:4px;">Потвърждавания: ${r.confirmations ? r.confirmations.length : 0}/3</div>
+      </div>
+    `;
+  } else if (isAuthor) {
+    verifyBtn = '<div style="font-size:10px; color:#94a3b8; margin-top:10px;">Ваш сигнал</div>';
+  } else if (hasConfirmed) {
+    verifyBtn = '<div style="font-size:10px; color:#4ade80; margin-top:10px;">Вие потвърдихте това</div>';
+  } else if (!currentUser) {
+    verifyBtn = '<div style="font-size:10px; color:#94a3b8; margin-top:10px;"><a href="#" onclick="openAuth(\'login\'); return false;">Влезте</a>, за да потвърдите</div>';
+  }
+
   marker.bindPopup(`
     <div style="font-family:Outfit,sans-serif;min-width:180px">
-      <strong>${emoji} ${label}</strong><br>
+      <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+        <strong>${emoji} ${label}</strong>
+      </div>
       <span style="color:${color}">● Риск: ${r.risk}</span><br>
       ${r.desc ? `<em>"${r.desc}"</em><br>` : ''}
       <small>👤︎ ${r.user} — ${r.time}</small>
+      ${verifyBtn}
     </div>
   `);
+  
+  return marker;
+}
+
+function verifyReport(index) {
+  const user = localStorage.getItem('resq_session');
+  if (!user) { openAuth('login'); return; }
+  
+  let reports = JSON.parse(localStorage.getItem('resq_reports') || '[]');
+  const r = reports[index];
+  
+  if (!r.confirmations) r.confirmations = [];
+  if (r.confirmations.includes(user)) return; // Already confirmed
+  if (r.user === user) return; // Cannot confirm own report
+  
+  r.confirmations.push(user);
+  
+  // Rule: 3 confirmations to become verified
+  if (r.confirmations.length >= 3) {
+    r.verified = true;
+  }
+  
+  localStorage.setItem('resq_reports', JSON.stringify(reports));
+  showToast('Благодарим за потвърждението!', 'ok');
+  
+  // Refresh the page or markers to show updated status
+  setTimeout(() => location.reload(), 800);
 }
 
 

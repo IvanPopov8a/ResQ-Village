@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="bg">
 <head>
   <meta charset="UTF-8">
@@ -60,7 +60,6 @@
         <option value="medium">🟡 Среден</option>
         <option value="high">🔴 Висок</option>
       </select>
-      <button class="btn-clear-reports" onclick="clearAllReports()">Изчисти всички</button>
     </div>
 
     <div id="reportsList" class="reports-list">
@@ -183,6 +182,7 @@ document.addEventListener('DOMContentLoaded', function () {
       const list  = document.getElementById('reportsList');
       let reports = JSON.parse(localStorage.getItem('resq_reports') || '[]');
 
+      reports = reports.filter(r => r.verified === true);
       if (typeF !== 'all') reports = reports.filter(r => r.type === typeF);
       if (riskF !== 'all') reports = reports.filter(r => r.risk === riskF);
 
@@ -190,7 +190,7 @@ document.addEventListener('DOMContentLoaded', function () {
       reports = [...reports].reverse();
 
       if (reports.length === 0) {
-        list.innerHTML = '<div class="reports-empty">Няма сигнали, отговарящи на филтъра. <a href="map.html">Добави сигнал</a></div>';
+        list.innerHTML = '<div class="reports-empty">Няма <strong>потвърдени</strong> сигнали. <a href="map.html">Отиди на картата</a>, за да помогнеш с потвърждаване или подаване на нов сигнал.</div>';
         return;
       }
 
@@ -206,13 +206,6 @@ document.addEventListener('DOMContentLoaded', function () {
           <a class="report-row-map" href="map.html" title="Виж на картата"></a>
         </div>
       `).join('');
-    }
-
-    function clearAllReports() {
-      if (confirm('Сигурен ли си, че искаш да изтриеш всички сигнали?')) {
-        localStorage.removeItem('resq_reports');
-        renderReports();
-      }
     }
 
     renderReports();

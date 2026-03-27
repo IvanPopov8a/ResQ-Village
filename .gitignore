@@ -1,2 +1,34 @@
 Frontend/ЛОГИКА_КАРТА_И_СИГНАЛИ.txt
 Frontend/villages.txt
+# --- General ---
+.DS_Store
+.env
+.env.local
+.env.*
+!.env.example
+
+# --- Python / FastAPI ---
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+ENV/
+build/
+dist/
+*.db
+.pytest_cache/
+
+# --- Node.js / Express ---
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.npm
+dist/
+build/
+
+# --- Frontend / PWA ---
+.expo/
+.next/
+out/
