@@ -27,6 +27,14 @@ L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
   attribution: '© CARTO'
 }).addTo(map);
 
+// Labels-only layer rendered on top of GeoJSON regions
+map.createPane('labels');
+map.getPane('labels').style.zIndex = 450;
+map.getPane('labels').style.pointerEvents = 'none';
+L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_only_labels/{z}/{x}/{y}{r}.png', {
+  pane: 'labels'
+}).addTo(map);
+
 
 // ── 2. Report system ────────────────────────────────────
 let reportMode   = false;
@@ -196,7 +204,7 @@ function addMarker(r, index) {
 
   let verifyBtn = '';
   if (r.verified) {
-    verifyBtn = '<div class="verified-badge-popup"> ✅ Потвърден</div>';
+    verifyBtn = '<div class="verified-badge-popup"> Потвърден</div>';
   } else if (currentUser && !isAuthor && !hasConfirmed) {
     verifyBtn = `
       <div style="margin-top:10px; text-align:center;">
@@ -370,7 +378,7 @@ function renderHospitalList(hospitals) {
       <h4>${h.name}</h4>
       <span class="sidebar-hospital-city">${h.city}</span>
       <div class="sidebar-hospital-info"><span>📞</span> ${h.phone}</div>
-      <div class="sidebar-hospital-info"><span>🏥</span> ${h.type}</div>
+      <div class="sidebar-hospital-info"><span>...</span> ${h.type}</div>
       <div class="sidebar-hospital-actions">
         <button class="btn-sidebar-route" onclick="zoomToHospital(${h.lat}, ${h.lon})">Виж на картата</button>
         <button class="btn-sidebar-route" style="background:#10b981" onclick="window.open('https://www.google.com/maps/dir/?api=1&destination=${h.lat},${h.lon}', '_blank')">Маршрут</button>
@@ -388,7 +396,7 @@ function addHospitalMarkers(hospitals) {
     const marker = L.marker([h.lat, h.lon], {
       icon: L.divIcon({
         className: 'hospital-marker-div',
-        html: '<div style="background:#3b82f6;color:white;width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;border:2px solid white;box-shadow:0 0 10px rgba(0,0,0,0.3)">🏥</div>',
+        html: '<div style="background:#3b82f6;color:white;width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;border:2px solid white;box-shadow:0 0 10px rgba(0,0,0,0.3)"></div>',
         iconSize: [30, 30],
         iconAnchor: [15, 15]
       })

@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="bg">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ResQ Village - Медицинска помощ</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="page.css">
+  <script src="medical-api.js"></script>
+</head>
+<body>
+
+  <header class="navbar">
+    <a href="index.html" class="logo">ResQ Village</a>
+    <ul class="nav-links">
+      <li><a href="index.html">Начало</a></li>
+      <li class="dropdown">
+        <a href="#">Услуги ≡</a>
+        <div class="dropdown-content">
+          <a href="map.html">Карта на риска</a>
+          <a href="alerts.html">Ранно предупреждение</a>
+          <a href="medical.html">Медицинска помощ</a>
+          <a href="guides.html">Наръчници за оцеляване</a>
+          <a href="reports.html">Всички сигнали</a>
+        </div>
+      </li>
+    </ul>
+    <div class="nav-auth">
+      <div id="authButtons">
+        <button class="btn-nav-login" onclick="openAuth('login')">Вход</button>
+        <button class="btn-nav-register" onclick="openAuth('register')">Регистрация</button>
+      </div>
+      <div id="userGreeting" style="display:none;">
+        <div class="user-avatar" id="userAvatar">U</div>
+        <span id="userName"></span>
+        <button class="btn-nav-logout" onclick="logout()">Изход</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="page-main">
+    <div class="page-hero medical-hero">
+      <div class="page-hero-icon"></div>
+      <h1>Медицинска помощ</h1>
+      <p>Намерете бързо най-близката болница или аптека при извънредна ситуация. Директни контакти и маршрути за спешна помощ.</p>
+    </div>
+
+    <div class="search-bar-container">
+      <div class="search-bar">
+        <span></span>
+        <input type="text" id="citySearch" placeholder="Търсете по населено място или регион…" oninput="filterHospitals()" onkeydown="if(event.key==='Enter') filterHospitals()">
+        <button class="btn-search" onclick="filterHospitals()">Търси</button>
+      </div>
+    </div>
+
+    <h2 class="section-title">Болници</h2>
+    <div class="medical-grid" id="hospitalGrid">
+      <div class="loading-spinner" style="grid-column: 1/-1; text-align: center; padding: 40px; color: #6366f1;">
+        <div style="font-size: 2rem; margin-bottom: 20px;"></div>
+        Зареждане на реални данни за болници в България...
+      </div>
+    </div>
+
+    <!-- No results message -->
+    <div id="noResults" style="display:none; text-align:center; padding:48px 20px; color:#475569;">
+      <div style="font-size:3rem; margin-bottom:16px;"></div>
+      <h3 style="color:#64748b; margin-bottom:8px;">Няма намерени болници</h3>
+      <p style="font-size:0.9rem;">Опитайте с друг град - напр. „София", „Варна", „Пловдив".</p>
+    </div>
+
+    <h2 class="section-title">Спешни номера</h2>
+    <div class="emergency-grid">
+      <div class="emergency-card">
+        <div class="emergency-number">112</div>
+        <div class="emergency-label">Единен европейски номер за спешна помощ</div>
+      </div>
+      <div class="emergency-card">
+        <div class="emergency-number">150</div>
+        <div class="emergency-label">Спешна медицинска помощ (ЦСМП)</div>
+      </div>
+      <div class="emergency-card">
+        <div class="emergency-number">160</div>
+        <div class="emergency-label">Пожарна и защита при бедствия</div>
+      </div>
+      <div class="emergency-card">
+        <div class="emergency-number">166</div>
+        <div class="emergency-label">Полиция</div>
+      </div>
+    </div>
+
+    <div class="page-info-box">
+      <div class="info-icon">📍</div>
+      <div>
+        <strong>Маршрутите</strong> използват вашата GPS локация като начална точка и отварят Google Maps с оптималния маршрут до избраната болница.
+      </div>
+    </div>
+  </main>
+
+  <script>
+    /* ── Hospital search and rendering ── */
+    let allHospitals = [];
+
+    function renderHospitals(hospitals) {
+      const grid = document.getElementById('hospitalGrid');
+      if (hospitals.length === 0) {
+        grid.innerHTML = '';
+        document.getElementById('noResults').style.display = 'block';
+        return;
+      }
+
+      document.getElementById('noResults').style.display = 'none';
+      grid.innerHTML = hospitals.map(h => `
+        <div class="medical-card" data-city="${h.city.toLowerCase()}">
+          <div class="medical-card-header hospital">
+            <span class="medical-icon"></span>
+            <div>
+              <h3>${h.name}</h3>
+              <span class="medical-city">${h.city}</span>
+            </div>
+          </div>
+          <div class="medical-card-body">
+            <div class="medical-info"><span>📞</span> ${h.phone !== 'няма данни' ? `<a href="tel:${h.phone.replace(/\s+/g, '')}">${h.phone}</a>` : 'няма данни'}</div>
+            <div class="medical-info"><span>🕐</span> 24/7 Спешно отделение</div>
+            <div class="medical-info"><span>📏</span> ${h.speciality}</div>
+            ${h.website ? `<div class="medical-info"><span>🌐</span> <a href="${h.website}" target="_blank">Уебсайт</a></div>` : ''}
+          </div>
+          <button class="btn-directions" onclick="getRoute(this, ${h.lat}, ${h.lon}, '${h.name.replace(/'/g, "\\'")}')">🧭 Маршрут</button>
+        </div>
+      `).join('');
+    }
+
+    function filterHospitals() {
+      const query = document.getElementById('citySearch').value.trim().toLowerCase();
+      if (!query) {
+        renderHospitals(allHospitals);
+        return;
+      }
+
+      const filtered = allHospitals.filter(h => 
+        h.city.toLowerCase().includes(query) || 
+        h.name.toLowerCase().includes(query) ||
+        h.speciality.toLowerCase().includes(query)
+      );
+      renderHospitals(filtered);
+    }
+
+    /* ── Route with user geolocation ── */
+    function getRoute(btn, lat, lon, name) {
+      const destination = lat && lon ? `${lat},${lon}` : `${name}, България`;
+      
+      if (!navigator.geolocation) {
+        window.open('https://www.google.com/maps/dir/?api=1&destination=' + encodeURIComponent(destination), '_blank');
+        return;
+      }
+
+      const originalText = btn.innerHTML;
+      btn.innerHTML = 'Локация…';
+      btn.disabled = true;
+
+      navigator.geolocation.getCurrentPosition(
+        (pos) => {
+          btn.innerHTML = originalText;
+          btn.disabled = false;
+          const { latitude, longitude } = pos.coords;
+          window.open(`https://www.google.com/maps/dir/?api=1&origin=${latitude},${longitude}&destination=${encodeURIComponent(destination)}&travelmode=driving`, '_blank');
+        },
+        (err) => {
+          btn.innerHTML = originalText;
+          btn.disabled = false;
+          window.open('https://www.google.com/maps/dir/?api=1&destination=' + encodeURIComponent(destination), '_blank');
+        },
+        { timeout: 8000, enableHighAccuracy: true }
+      );
+    }
+  </script>
+
+  <!-- Auth Modal -->
+  <div id="authModal">
+    <div id="authModalContent">
+      <button class="modal-close" onclick="closeAuth()">✕</button>
+      <div class="auth-logo">ResQ Village</div>
+      <div class="auth-tabs">
+        <button class="auth-tab active" id="tabLogin" onclick="switchTab('login')">Вход</button>
+        <button class="auth-tab" id="tabRegister" onclick="switchTab('register')">Регистрация</button>
+      </div>
+      <form id="loginForm" class="auth-form" onsubmit="doLogin(event)">
+        <div class="input-group"><span class="input-icon">✉️</span><input type="email" id="loginEmail" placeholder="Имейл" required></div>
+        <div class="input-group"><span class="input-icon">🔒</span><input type="password" id="loginPass" placeholder="Парола" required></div>
+        <button type="submit" class="btn-auth-submit">Вход</button>
+        <p class="auth-hint">Нямате акаунт? <a href="#" onclick="switchTab('register');return false;">Регистрирайте се</a></p>
+      </form>
+      <form id="registerForm" class="auth-form" style="display:none;" onsubmit="doRegister(event)">
+        <div class="input-group"><span class="input-icon">✉️</span><input type="email" id="regEmail" placeholder="Имейл" required></div>
+        <div class="input-group"><span class="input-icon">🔒</span><input type="password" id="regPass" placeholder="Парола" required></div>
+        <div class="input-group"><span class="input-icon">🔒</span><input type="password" id="regPass2" placeholder="Потвърдете паролата" required></div>
+        <button type="submit" class="btn-auth-submit">Регистрация</button>
+        <p class="auth-hint">Вече имате акаунт? <a href="#" onclick="switchTab('login');return false;">Влезте</a></p>
+      </form>
+      <p id="authMsg" class="auth-message"></p>
+    </div>
+  </div>
+
+  <script src="auth.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', async function () {
+      // Load real hospital data
+      try {
+        allHospitals = await fetchRealHospitals();
+        renderHospitals(allHospitals);
+      } catch (err) {
+        console.error("Failed to load hospitals:", err);
+        document.getElementById('hospitalGrid').innerHTML = '<div class="error-msg">Грешка при зареждане на данните. Моля, опитайте по-късно.</div>';
+      }
+    });
+  </script>
+</body>
+</html>
