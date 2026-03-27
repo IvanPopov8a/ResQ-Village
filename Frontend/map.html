@@ -114,13 +114,12 @@
       <button class="auth-tab" id="tabRegister" onclick="switchTab('register')">Регистрация</button>
     </div>
     <form id="loginForm" class="auth-form" onsubmit="doLogin(event)">
-      <div class="input-group"><span class="input-icon">👤︎</span><input type="text" id="loginUser" placeholder="Потребителско име" required></div>
+      <div class="input-group"><span class="input-icon">✉️</span><input type="email" id="loginEmail" placeholder="Имейл" required></div>
       <div class="input-group"><span class="input-icon">🔒</span><input type="password" id="loginPass" placeholder="Парола" required></div>
       <button type="submit" class="btn-auth-submit">Вход</button>
       <p class="auth-hint">Нямате акаунт? <a href="#" onclick="switchTab('register');return false;">Регистрирайте се</a></p>
     </form>
     <form id="registerForm" class="auth-form" style="display:none;" onsubmit="doRegister(event)">
-      <div class="input-group"><span class="input-icon">👤︎</span><input type="text" id="regUser" placeholder="Потребителско име" required></div>
       <div class="input-group"><span class="input-icon">✉️</span><input type="email" id="regEmail" placeholder="Имейл" required></div>
       <div class="input-group"><span class="input-icon">🔒</span><input type="password" id="regPass" placeholder="Парола" required></div>
       <div class="input-group"><span class="input-icon">🔒</span><input type="password" id="regPass2" placeholder="Потвърдете паролата" required></div>
@@ -136,8 +135,8 @@
   <button class="sidebar-toggle-btn" id="sidebarToggle" onclick="toggleSidebar()" title="Отвори/Затвори менюто">☰</button>
   <div class="sidebar-inner">
     <div class="sidebar-tabs">
-      <button class="sidebar-tab active" id="tabAlerts" onclick="switchSidebarTab('alerts')">⚠️ Сигнали</button>
-      <button class="sidebar-tab" id="tabMedical" onclick="switchSidebarTab('medical')">🩺 Болници</button>
+      <button class="sidebar-tab active" id="tabAlerts" onclick="switchSidebarTab('alerts')">Сигнали</button>
+      <button class="sidebar-tab" id="tabMedical" onclick="switchSidebarTab('medical')">Болници</button>
     </div>
     
     <div id="sectionAlerts" class="sidebar-section active">
