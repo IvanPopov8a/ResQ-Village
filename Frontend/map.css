@@ -182,6 +182,10 @@
   -webkit-appearance: none;
 }
 .report-select:focus { border-color: #6366f1; }
+.report-select option {
+  background: #fff;
+  color: #1e293b;
+}
 
 .report-textarea {
   width: 100%;
@@ -356,7 +360,115 @@
 }
 
 
-/* ── 7. Marker pulse animation ──────────────────────────*/
+/* ── 7. Region risk overlay styles ─────────────────────*/
+/* Override Leaflet default tooltip for region tooltips */
+.leaflet-tooltip {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  border-radius: 10px;
+  padding: 0;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.25);
+  color: #1e293b;
+}
+.leaflet-tooltip-top:before,
+.leaflet-tooltip-bottom:before,
+.leaflet-tooltip-left:before,
+.leaflet-tooltip-right:before {
+  border-top-color: rgba(255, 255, 255, 0.95);
+}
+
+.region-tooltip {
+  font-family: 'Outfit', sans-serif;
+  font-size: 0.82rem;
+  color: #1e293b;
+  min-width: 140px;
+  padding: 10px 14px;
+}
+.region-tooltip .region-name {
+  font-weight: 700;
+  font-size: 0.92rem;
+  margin-bottom: 6px;
+  display: block;
+}
+.region-tooltip .region-threat {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 600;
+}
+.region-tooltip .threat-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  display: inline-block;
+  flex-shrink: 0;
+}
+.region-tooltip .region-threat-type {
+  font-size: 0.78rem;
+  color: #475569;
+  margin-top: 4px;
+}
+
+.risk-legend {
+  position: absolute;
+  top: 80px;
+  right: 16px;
+  background: rgba(15, 23, 42, 0.88);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  padding: 14px 18px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+  z-index: 1000;
+  font-family: 'Outfit', sans-serif;
+  min-width: 160px;
+}
+.risk-legend strong {
+  display: block;
+  margin-bottom: 10px;
+  font-size: 0.9rem;
+  color: #fff;
+}
+.risk-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 6px 0;
+  font-size: 0.82rem;
+  color: #cbd5e1;
+}
+.risk-legend-dot {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  border: 2px solid rgba(255,255,255,0.15);
+}
+
+.risk-update-badge {
+  position: absolute;
+  top: 80px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(99, 102, 241, 0.9);
+  color: white;
+  padding: 8px 18px;
+  border-radius: 20px;
+  font-family: 'Outfit', sans-serif;
+  font-size: 0.8rem;
+  font-weight: 600;
+  z-index: 1500;
+  opacity: 0;
+  transition: opacity 0.4s ease;
+  pointer-events: none;
+  box-shadow: 0 4px 16px rgba(99, 102, 241, 0.4);
+}
+
+
+/* ── 8. Marker pulse animation ──────────────────────────*/
 @keyframes markerPulse {
   0%, 100% { opacity: 0.8; }
   50%      { opacity: 0.4; }
