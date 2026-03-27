@@ -1,0 +1,25 @@
+# --- Core API & Server ---
+fastapi
+uvicorn[standard]
+python-dotenv
+
+# --- Database & Spatial (PostGIS) ---
+SQLAlchemy
+geoalchemy2
+psycopg2-binary
+
+# --- Security & Authentication ---
+passlib[bcrypt]
+python-jose[cryptography]
+pydantic[email]
+
+# --- Background Jobs & HTTP Clients ---
+APScheduler
+httpx
+requests
+
+# --- Machine Learning & Data Processing ---
+pandas
+numpy
+xgboost
+joblib
