@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="bg">
 <head>
   <meta charset="UTF-8">
@@ -18,9 +18,7 @@
       <li class="dropdown">
         <a href="#">Услуги ≡</a>
         <div class="dropdown-content">
-          <a href="map.html">Карта на риска</a>
-          <a href="alerts.html">Ранно предупреждение</a>
-          <a href="medical.html">Медицинска помощ</a>
+          <a href="map.html">Карта</a>
           <a href="guides.html">Наръчници за оцеляване</a>
           <a href="reports.html">Всички сигнали</a>
         </div>
@@ -231,20 +229,21 @@ document.addEventListener('DOMContentLoaded', function () {
     };
 
     function renderStats() {
-      const reports = JSON.parse(localStorage.getItem('resq_reports') || '[]');
+      const allReports = JSON.parse(localStorage.getItem('resq_reports') || '[]');
+      const reports = allReports.filter(r => r.verified === true);
       const grid    = document.getElementById('statsGrid');
 
       const counts = {};
       reports.forEach(r => { counts[r.type] = (counts[r.type] || 0) + 1; });
 
       const total    = reports.length;
-      const verified = reports.filter(r => r.verified).length;
+      const unverified = allReports.filter(r => !r.verified).length;
       const high     = reports.filter(r => r.risk === 'high').length;
 
       const summaryCards = [
-        { icon: '', value: total,    label: 'Общо сигнали',       color: '#38bdf8' },
-        { icon: '', value: verified, label: 'Потвърдени',          color: '#4ade80' },
-        { icon: '', value: high,     label: 'Висок риск',          color: '#ef4444' },
+        { icon: '🛡️', value: total,    label: 'Потвърдени сигнали', color: '#4ade80' },
+        { icon: '⏳', value: unverified, label: 'В изчакване',      color: '#fbbf24' },
+        { icon: '🚨', value: high,     label: 'С висок риск',       color: '#ef4444' },
       ];
 
       let html = summaryCards.map(c => `
@@ -277,7 +276,8 @@ document.addEventListener('DOMContentLoaded', function () {
 
     /* ── Recent reports ── */
     function renderRecent() {
-      const reports = JSON.parse(localStorage.getItem('resq_reports') || '[]');
+      const allReports = JSON.parse(localStorage.getItem('resq_reports') || '[]');
+      const reports = allReports.filter(r => r.verified === true);
       const grid    = document.getElementById('recentGrid');
       const empty   = document.getElementById('recentEmpty');
 

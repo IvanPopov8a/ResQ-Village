@@ -15,6 +15,7 @@ const logger         = require('./services/logger');
 const sensorPolling  = require('./jobs/sensorPolling');
 const usersRouter    = require('./routes/users');
 const alertsRouter   = require('./routes/alerts');
+const db = require('./db/setup');
 
 const app    = express();
 const server = http.createServer(app);

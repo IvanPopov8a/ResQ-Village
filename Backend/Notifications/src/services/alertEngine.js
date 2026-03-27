@@ -2,7 +2,7 @@
 // Мозъкът на системата - оценява сензорни данни и решава кога да алармира
 // Всяка функция получава сурови данни и връща алерт или null
 
-const db = require('../db');
+const db = require('../db/setup');
 const cache = require('./cache');
 const notificationService = require('./notificationService');
 const logger = require('./logger');

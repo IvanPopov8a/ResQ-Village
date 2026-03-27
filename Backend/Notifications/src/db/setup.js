@@ -139,8 +139,10 @@ async function setup() {
     throw err;
   } finally {
     client.release();
-    await pool.end();
+    //await pool.end();
   }
 }
 
 setup();
+
+module.exports = pool;

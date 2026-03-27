@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="bg">
 <head>
   <meta charset="UTF-8">
@@ -6,6 +6,7 @@
   <title>ResQ Village - Медицинска помощ</title>
   <link rel="stylesheet" href="style.css">
   <link rel="stylesheet" href="page.css">
+  <script src="medical-api.js"></script>
 </head>
 <body>
 
@@ -54,135 +55,10 @@
 
     <h2 class="section-title">Болници</h2>
     <div class="medical-grid" id="hospitalGrid">
-
-      <div class="medical-card" data-city="софия">
-        <div class="medical-card-header hospital">
-          <span class="medical-icon">🏥</span>
-          <div>
-            <h3>УМБАЛ „Александровска"</h3>
-            <span class="medical-city">София</span>
-          </div>
-        </div>
-        <div class="medical-card-body">
-          <div class="medical-info"><span>📞</span> <a href="tel:+35929230145">+359 2 923 0145</a></div>
-          <div class="medical-info"><span>🕐</span> 24/7 Спешно отделение</div>
-          <div class="medical-info"><span>📏</span> Многопрофилна университетска болница</div>
-        </div>
-        <button class="btn-directions" onclick="getRoute(this, 'УМБАЛ Александровска, София, България')">🧭 Маршрут</button>
+      <div class="loading-spinner" style="grid-column: 1/-1; text-align: center; padding: 40px; color: #6366f1;">
+        <div style="font-size: 2rem; margin-bottom: 20px;"></div>
+        Зареждане на реални данни за болници в България...
       </div>
-
-      <div class="medical-card" data-city="софия">
-        <div class="medical-card-header hospital">
-          <span class="medical-icon">🏥</span>
-          <div>
-            <h3>УМБАЛ „Св. Иван Рилски"</h3>
-            <span class="medical-city">София</span>
-          </div>
-        </div>
-        <div class="medical-card-body">
-          <div class="medical-info"><span>📞</span> <a href="tel:+35928525902">+359 2 852 5902</a></div>
-          <div class="medical-info"><span>🕐</span> 24/7 Спешно отделение</div>
-          <div class="medical-info"><span>📏</span> Специализирана урологична болница</div>
-        </div>
-        <button class="btn-directions" onclick="getRoute(this, 'УМБАЛ Свети Иван Рилски, София, България')">🧭 Маршрут</button>
-      </div>
-
-      <div class="medical-card" data-city="пловдив">
-        <div class="medical-card-header hospital">
-          <span class="medical-icon">🏥</span>
-          <div>
-            <h3>УМБАЛ „Св. Георги"</h3>
-            <span class="medical-city">Пловдив</span>
-          </div>
-        </div>
-        <div class="medical-card-body">
-          <div class="medical-info"><span>📞</span> <a href="tel:+35932602968">+359 32 602 968</a></div>
-          <div class="medical-info"><span>🕐</span> 24/7 Спешно отделение</div>
-          <div class="medical-info"><span>📏</span> Многопрофилна университетска болница</div>
-        </div>
-        <button class="btn-directions" onclick="getRoute(this, 'УМБАЛ Свети Георги, Пловдив, България')">🧭 Маршрут</button>
-      </div>
-
-      <div class="medical-card" data-city="варна">
-        <div class="medical-card-header hospital">
-          <span class="medical-icon">🏥</span>
-          <div>
-            <h3>УМБАЛ „Света Марина"</h3>
-            <span class="medical-city">Варна</span>
-          </div>
-        </div>
-        <div class="medical-card-body">
-          <div class="medical-info"><span>📞</span> <a href="tel:+35952978100">+359 52 978 100</a></div>
-          <div class="medical-info"><span>🕐</span> 24/7 Спешно отделение</div>
-          <div class="medical-info"><span>📏</span> Многопрофилна университетска болница</div>
-        </div>
-        <button class="btn-directions" onclick="getRoute(this, 'УМБАЛ Света Марина, Варна, България')">🧭 Маршрут</button>
-      </div>
-
-      <div class="medical-card" data-city="бургас">
-        <div class="medical-card-header hospital">
-          <span class="medical-icon">🏥</span>
-          <div>
-            <h3>УМБАЛ „Бургас"</h3>
-            <span class="medical-city">Бургас</span>
-          </div>
-        </div>
-        <div class="medical-card-body">
-          <div class="medical-info"><span>📞</span> <a href="tel:+35956800600">+359 56 800 600</a></div>
-          <div class="medical-info"><span>🕐</span> 24/7 Спешно отделение</div>
-          <div class="medical-info"><span>📏</span> Многопрофилна областна болница</div>
-        </div>
-        <button class="btn-directions" onclick="getRoute(this, 'УМБАЛ Бургас, Бургас, България')">🧭 Маршрут</button>
-      </div>
-
-      <div class="medical-card" data-city="стара загора">
-        <div class="medical-card-header hospital">
-          <span class="medical-icon">🏥</span>
-          <div>
-            <h3>УМБАЛ „Проф. д-р Ст. Киркович"</h3>
-            <span class="medical-city">Стара Загора</span>
-          </div>
-        </div>
-        <div class="medical-card-body">
-          <div class="medical-info"><span>📞</span> <a href="tel:+35942664444">+359 42 664 444</a></div>
-          <div class="medical-info"><span>🕐</span> 24/7 Спешно отделение</div>
-          <div class="medical-info"><span>📏</span> Многопрофилна университетска болница</div>
-        </div>
-        <button class="btn-directions" onclick="getRoute(this, 'УМБАЛ Проф. Киркович, Стара Загора, България')">🧭 Маршрут</button>
-      </div>
-
-      <div class="medical-card" data-city="русе">
-        <div class="medical-card-header hospital">
-          <span class="medical-icon">🏥</span>
-          <div>
-            <h3>УМБАЛ „Канев"</h3>
-            <span class="medical-city">Русе</span>
-          </div>
-        </div>
-        <div class="medical-card-body">
-          <div class="medical-info"><span>📞</span> <a href="tel:+35982888300">+359 82 888 300</a></div>
-          <div class="medical-info"><span>🕐</span> 24/7 Спешно отделение</div>
-          <div class="medical-info"><span>📏</span> Многопрофилна университетска болница</div>
-        </div>
-        <button class="btn-directions" onclick="getRoute(this, 'УМБАЛ Канев, Русе, България')">🧭 Маршрут</button>
-      </div>
-
-      <div class="medical-card" data-city="плевен">
-        <div class="medical-card-header hospital">
-          <span class="medical-icon">🏥</span>
-          <div>
-            <h3>УМБАЛ „Д-р Георги Странски"</h3>
-            <span class="medical-city">Плевен</span>
-          </div>
-        </div>
-        <div class="medical-card-body">
-          <div class="medical-info"><span>📞</span> <a href="tel:+35964886100">+359 64 886 100</a></div>
-          <div class="medical-info"><span>🕐</span> 24/7 Спешно отделение</div>
-          <div class="medical-info"><span>📏</span> Многопрофилна университетска болница</div>
-        </div>
-        <button class="btn-directions" onclick="getRoute(this, 'УМБАЛ Д-р Георги Странски, Плевен, България')">🧭 Маршрут</button>
-      </div>
-
     </div>
 
     <!-- No results message -->
@@ -221,33 +97,62 @@
   </main>
 
   <script>
-    /* ── Hospital search ── */
-    function filterHospitals() {
-      const query = document.getElementById('citySearch').value.trim().toLowerCase();
-      const cards = document.querySelectorAll('#hospitalGrid .medical-card');
-      let visibleCount = 0;
-      cards.forEach(card => {
-        const city = card.getAttribute('data-city') || '';
-        const name = card.querySelector('h3') ? card.querySelector('h3').textContent.toLowerCase() : '';
-        const matches = !query || city.includes(query) || name.includes(query);
-        card.style.display = matches ? '' : 'none';
-        if (matches) visibleCount++;
-      });
-      document.getElementById('noResults').style.display = visibleCount === 0 ? 'block' : 'none';
-    }
+    /* ── Hospital search and rendering ── */
+    let allHospitals = [];
 
-    /* ── Route with user geolocation ── */
-    function getRoute(btn, destination) {
-      if (!navigator.geolocation) {
-        // Geolocation not supported — open Maps with just the destination
-        window.open(
-          'https://www.google.com/maps/dir/?api=1&destination=' + encodeURIComponent(destination),
-          '_blank'
-        );
+    function renderHospitals(hospitals) {
+      const grid = document.getElementById('hospitalGrid');
+      if (hospitals.length === 0) {
+        grid.innerHTML = '';
+        document.getElementById('noResults').style.display = 'block';
         return;
       }
 
-      // Show loading state on the button
+      document.getElementById('noResults').style.display = 'none';
+      grid.innerHTML = hospitals.map(h => `
+        <div class="medical-card" data-city="${h.city.toLowerCase()}">
+          <div class="medical-card-header hospital">
+            <span class="medical-icon"></span>
+            <div>
+              <h3>${h.name}</h3>
+              <span class="medical-city">${h.city}</span>
+            </div>
+          </div>
+          <div class="medical-card-body">
+            <div class="medical-info"><span>📞</span> ${h.phone !== 'няма данни' ? `<a href="tel:${h.phone.replace(/\s+/g, '')}">${h.phone}</a>` : 'няма данни'}</div>
+            <div class="medical-info"><span>🕐</span> 24/7 Спешно отделение</div>
+            <div class="medical-info"><span>📏</span> ${h.speciality}</div>
+            ${h.website ? `<div class="medical-info"><span>🌐</span> <a href="${h.website}" target="_blank">Уебсайт</a></div>` : ''}
+          </div>
+          <button class="btn-directions" onclick="getRoute(this, ${h.lat}, ${h.lon}, '${h.name.replace(/'/g, "\\'")}')">🧭 Маршрут</button>
+        </div>
+      `).join('');
+    }
+
+    function filterHospitals() {
+      const query = document.getElementById('citySearch').value.trim().toLowerCase();
+      if (!query) {
+        renderHospitals(allHospitals);
+        return;
+      }
+
+      const filtered = allHospitals.filter(h => 
+        h.city.toLowerCase().includes(query) || 
+        h.name.toLowerCase().includes(query) ||
+        h.speciality.toLowerCase().includes(query)
+      );
+      renderHospitals(filtered);
+    }
+
+    /* ── Route with user geolocation ── */
+    function getRoute(btn, lat, lon, name) {
+      const destination = lat && lon ? `${lat},${lon}` : `${name}, България`;
+      
+      if (!navigator.geolocation) {
+        window.open('https://www.google.com/maps/dir/?api=1&destination=' + encodeURIComponent(destination), '_blank');
+        return;
+      }
+
       const originalText = btn.innerHTML;
       btn.innerHTML = 'Локация…';
       btn.disabled = true;
@@ -257,22 +162,12 @@
           btn.innerHTML = originalText;
           btn.disabled = false;
           const { latitude, longitude } = pos.coords;
-          const url =
-            'https://www.google.com/maps/dir/?api=1' +
-            '&origin=' + latitude + ',' + longitude +
-            '&destination=' + encodeURIComponent(destination) +
-            '&travelmode=driving';
-          window.open(url, '_blank');
+          window.open(`https://www.google.com/maps/dir/?api=1&origin=${latitude},${longitude}&destination=${encodeURIComponent(destination)}&travelmode=driving`, '_blank');
         },
         (err) => {
           btn.innerHTML = originalText;
           btn.disabled = false;
-          // Permission denied or timeout — fall back to destination only
-          const url =
-            'https://www.google.com/maps/dir/?api=1' +
-            '&destination=' + encodeURIComponent(destination) +
-            '&travelmode=driving';
-          window.open(url, '_blank');
+          window.open('https://www.google.com/maps/dir/?api=1&destination=' + encodeURIComponent(destination), '_blank');
         },
         { timeout: 8000, enableHighAccuracy: true }
       );
@@ -369,7 +264,7 @@ function clearMsg() {
   const el = document.getElementById('authMsg');
   el.textContent = ''; el.className = 'auth-message';
 }
-document.addEventListener('DOMContentLoaded', function () {
+document.addEventListener('DOMContentLoaded', async function () {
   document.getElementById('authModal').addEventListener('click', function(e) {
     if (e.target === this) closeAuth();
   });
@@ -379,6 +274,15 @@ document.addEventListener('DOMContentLoaded', function () {
     document.getElementById('userGreeting').style.display = 'flex';
     document.getElementById('userName').textContent        = s;
     document.getElementById('userAvatar').textContent      = s.charAt(0).toUpperCase();
+  }
+
+  // Load real hospital data
+  try {
+    allHospitals = await fetchRealHospitals();
+    renderHospitals(allHospitals);
+  } catch (err) {
+    console.error("Failed to load hospitals:", err);
+    document.getElementById('hospitalGrid').innerHTML = '<div class="error-msg">Грешка при зареждане на данните. Моля, опитайте по-късно.</div>';
   }
 });
 </script>
