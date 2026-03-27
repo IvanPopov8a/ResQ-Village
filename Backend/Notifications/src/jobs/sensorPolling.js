@@ -230,7 +230,7 @@ async function pollFireData() {
   } catch (err) {
     logger.error(`Грешка при polling на пожарни данни: ${err.message}`);
   }
-}
+
 
 /**
  * Почиства неактивни алерти по-стари от 48 часа
