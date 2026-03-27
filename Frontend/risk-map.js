@@ -200,5 +200,5 @@ function simulateThreatUpdate() {
 document.addEventListener('DOMContentLoaded', () => {
   loadRiskRegions();
   // Симулирай обновяване на всеки 30 секунди
-  setInterval(simulateThreatUpdate, 30000);
+  setInterval(simulateThreatUpdate, 300000);
 });
