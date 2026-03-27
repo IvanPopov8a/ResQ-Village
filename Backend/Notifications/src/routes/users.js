@@ -71,7 +71,7 @@ router.put('/:id/location', async (req, res) => {
   }
 
   // Валидация - координатите трябва да са в разумни граници за България
-  if (lat < 41 || lat > 44.5 || lng < 22 || lng > 29) {
+  if (lat < 41 || lat > 44.5 || lng < 22 || lng > 29)  {
     return res.status(400).json({ error: 'Координатите са извън обхвата' });
   }
 

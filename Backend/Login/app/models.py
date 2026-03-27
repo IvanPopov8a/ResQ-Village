@@ -26,9 +26,11 @@ class User(Base):
     __tablename__ = "users"
 
     id = Column(Integer, primary_key=True, index=True)
-    phone = Column(String(20))
     email = Column(String(255), unique=True, index=True)
     hashed_password = Column(String)
+    phone = Column(String(20), unique=True) 
+    notify_flood = Column(Boolean, default=True)
+    notify_earthquake = Column(Boolean, default=True)
     
     # Location tracking for proximity alerts
     last_lat = Column(DECIMAL(10, 7))
@@ -56,6 +58,11 @@ class Alert(Base):
     type = Column(String(50), default="fire") # Defaulting to fire as requested
     level = Column(Integer, nullable=False)
     level_name = Column(String(20), nullable=False) # e.g., "КРИТИЧНО"
+    title_bg = Column(String(255))
+    body_bg = Column(String(1000))
+    active = Column(Boolean, default=True)
+    notified_push = Column(Integer, default=0)
+    notified_sms = Column(Integer, default=0)
     
     village_id = Column(Integer, ForeignKey("villages.id"))
     

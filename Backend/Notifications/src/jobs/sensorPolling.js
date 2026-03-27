@@ -26,7 +26,7 @@ function startAllJobs(socketIo) {
   //cron.schedule('*/2 * * * *', () => pollSeismicData());
 
   // NASA FIRMS пожари - на всеки 15 минути (сателитите преминават на 10-20 мин)
-  cron.schedule('*/10 * * * * *', () => pollFireData());
+  cron.schedule('*/15 * * * * ', () => pollFireData());
 
   // Почисти стари алерти - веднъж дневно в 3 сутринта
   cron.schedule('0 3 * * *', () => cleanOldAlerts());

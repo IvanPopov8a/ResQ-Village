@@ -11,7 +11,7 @@ const logger = require('./logger');
 
 // Конфигурация на Web Push с VAPID ключове
 console.log("VAPID Email:", process.env.VAPID_EMAIL);
-console.log("VAPID Public Key:", process.env.VAPID_PUBLIC_KEY ? "Loaded ✅" : "Missing ❌");
+console.log("VAPID Public Key:", process.env.VAPID_PUBLIC_KEY ? "Loaded" : "Missing");
 
 webpush.setVapidDetails(
   process.env.VAPID_EMAIL,

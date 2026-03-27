@@ -117,32 +117,79 @@ async function setup() {
       );
     `);
 
-    // Примерни данни за тестване
+    // 1. Почистваме старите данни, за да нямаме дубликати
+    await client.query(`TRUNCATE TABLE villages CASCADE;`);
+
+    console.log('Старите тестови данни са изтрити. Добавяне на 50-те нови села...');
+
+    // 2. Вкарваме реалния списък с всички нужни колони
     await client.query(`
-      INSERT INTO villages (name, oblast, lat, lng, mayor_phone, flood_risk_level)
+      INSERT INTO villages (name, oblast, lat, lng, fire_risk_level, mayor_phone)
       VALUES 
-        ('Искрец',        'Софийска',  42.9123, 23.1456, '0910123456', 0),
-        ('Петрохан',      'Монтана',   43.1234, 23.2345, '0920234567', 0),
-        ('Карлово',       'Пловдивска', 42.6432, 24.8123, '0930345678', 0),
-        ('Ябланица',      'Ловешка',   43.0234, 24.0876, '0940456789', 0),
-        ('Горна Оряховица','Великотърновска', 43.1245, 25.6789, '0950567890', 0)
-      ON CONFLICT DO NOTHING;
+        ('Bregovo', 'Vidin', 44.1500, 22.6600, 0, '0888000001'),
+        ('Dondukovo', 'Vidin', 44.0000, 22.5500, 0, '0888000002'),
+        ('Drenovets', 'Vidin', 43.7700, 22.9300, 0, '0888000003'),
+        ('Valchedram', 'Montana', 43.7000, 23.4500, 0, '0888000004'),
+        ('Belimel', 'Montana', 43.5200, 23.0800, 0, '0888000005'),
+        ('Byala Slatina', 'Vratsa', 43.4700, 23.9300, 0, '0888000006'),
+        ('Borovan', 'Vratsa', 43.4300, 23.7300, 0, '0888000007'),
+        ('Knezha (village)', 'Pleven', 43.5000, 24.0800, 0, '0888000008'),
+        ('Glozhene', 'Lovech', 43.0800, 23.9500, 0, '0888000009'),
+        ('Ugarchin', 'Lovech', 43.1000, 24.4200, 0, '0888000010'),
+        ('Dolni Dabnik', 'Pleven', 43.4000, 24.4300, 0, '0888000011'),
+        ('Byala Cherkva', 'Veliko Tarnovo', 43.2100, 25.1000, 0, '0888000012'),
+        ('Polikraishte', 'Veliko Tarnovo', 43.1200, 25.5600, 0, '0888000013'),
+        ('Dve Mogili', 'Ruse', 43.6000, 25.8700, 0, '0888000014'),
+        ('Samuil', 'Razgrad', 43.5300, 26.7700, 0, '0888000015'),
+        ('Opaka', 'Targovishte', 43.4500, 26.1800, 0, '0888000016'),
+        ('Popovo', 'Targovishte', 43.3500, 26.2300, 0, '0888000017'),
+        ('Sitovo', 'Silistra', 43.9700, 27.1800, 0, '0888000018'),
+        ('Dulovo', 'Silistra', 43.8200, 27.1500, 0, '0888000019'),
+        ('General Toshevo', 'Dobrich', 43.7000, 28.0400, 0, '0888000020'),
+        ('Krushari', 'Dobrich', 43.8700, 27.7500, 0, '0888000021'),
+        ('Avren', 'Varna', 43.1500, 27.7500, 0, '0888000022'),
+        ('Dalgopol', 'Varna', 43.0000, 27.3500, 0, '0888000023'),
+        ('Nikola Kozlevo', 'Shumen', 43.4800, 27.2500, 0, '0888000024'),
+        ('Nevestino', 'Kyustendil', 42.2000, 22.8300, 0, '0888000025'),
+        ('Treklyano', 'Kyustendil', 42.5600, 22.6200, 0, '0888000026'),
+        ('Zemen', 'Pernik', 42.5000, 22.9200, 0, '0888000027'),
+        ('Svoge', 'Sofia Province', 43.0600, 23.3400, 0, '0888000028'),
+        ('Koprivshtitsa (village)', 'Sofia Province', 42.6400, 24.3600, 0, '0888000029'),
+        ('Mirkovo', 'Sofia Province', 42.6900, 23.9700, 0, '0888000030'),
+        ('Kresna', 'Blagoevgrad', 41.8200, 23.1600, 0, '0888000031'),
+        ('Belitsa', 'Blagoevgrad', 41.9500, 23.5700, 0, '0888000032'),
+        ('Garmen', 'Blagoevgrad', 41.6200, 23.8200, 0, '0888000033'),
+        ('Bratsigovo', 'Pazardzhik', 42.0200, 24.3700, 0, '0888000034'),
+        ('Strelcha', 'Pazardzhik', 42.5100, 24.3200, 0, '0888000035'),
+        ('Kaloyanovo', 'Plovdiv', 42.3700, 24.7200, 0, '0888000036'),
+        ('Sadovo', 'Plovdiv', 42.1300, 24.9400, 0, '0888000037'),
+        ('Bratya Daskalovi', 'Stara Zagora', 42.2700, 25.2200, 0, '0888000038'),
+        ('Nikolaevo', 'Stara Zagora', 42.6300, 25.7800, 0, '0888000039'),
+        ('Kotel (village)', 'Sliven', 42.8800, 26.4500, 0, '0888000040'),
+        ('Tundzha (village)', 'Yambol', 42.3800, 26.5200, 0, '0888000041'),
+        ('Sredets', 'Burgas', 42.3500, 27.1700, 0, '0888000042'),
+        ('Kameno', 'Burgas', 42.5700, 27.3000, 0, '0888000043'),
+        ('Malko Tarnovo', 'Burgas', 41.9900, 27.5200, 0, '0888000044'),
+        ('Banite', 'Smolyan', 41.6800, 24.9400, 0, '0888000045'),
+        ('Borino', 'Smolyan', 41.6800, 24.2700, 0, '0888000046'),
+        ('Ardino', 'Kardzhali', 41.5900, 25.1300, 0, '0888000047'),
+        ('Momchilgrad', 'Kardzhali', 41.5300, 25.4100, 0, '0888000048'),
+        ('Madzharovo', 'Haskovo', 41.6000, 25.8500, 0, '0888000049'),
+        ('Harmanli', 'Haskovo', 41.9300, 25.9000, 0, '0888000050');
     `);
 
-    console.log('✅ База данни настроена успешно!');
-    console.log('✅ PostGIS активиран');
-    console.log('✅ Таблици създадени: villages, users, alerts, notification_log');
-    console.log('✅ Примерни данни добавени');
-
+    console.log('Новите бази данни са успешно заредени!');
   } catch (err) {
-    console.error('❌ Грешка при настройка:', err.message);
-    throw err;
+    console.error('Грешка при инициализация на базата:', err);
   } finally {
     client.release();
-    //await pool.end();
+    pool.end();
   }
 }
 
+setup();
+
+    console.log('Новите бази данни са успешно заредени!');
 setup();
 
 module.exports = pool;
