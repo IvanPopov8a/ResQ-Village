@@ -20,8 +20,17 @@ const map = L.map('map', {
   maxBoundsViscosity: 1.0
 }).fitBounds(bounds);
 
-L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+// Base map without labels
+L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}{r}.png', {
   attribution: '© CARTO'
+}).addTo(map);
+
+// Labels-only layer rendered on top of GeoJSON regions
+map.createPane('labels');
+map.getPane('labels').style.zIndex = 450;
+map.getPane('labels').style.pointerEvents = 'none';
+L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_only_labels/{z}/{x}/{y}{r}.png', {
+  pane: 'labels'
 }).addTo(map);
 
 
