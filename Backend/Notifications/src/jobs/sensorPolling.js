@@ -4,7 +4,7 @@
 
 const cron = require('node-cron');
 const axios = require('axios');
-const db = require('../db');
+const db = require('../db/setup');
 const cache = require('../services/cache');
 const alertEngine = require('../services/alertEngine');
 const logger = require('../services/logger');
@@ -20,22 +20,22 @@ function startAllJobs(socketIo) {
   logger.info('Стартиране на cron jobs...');
 
   // Метеорологични и хидроложки данни - на всеки 5 минути
-  cron.schedule('*/5 * * * *', () => pollHydrologicalData());
+  //cron.schedule('*/5 * * * *', () => pollHydrologicalData());
 
   // Сеизмични данни - на всеки 2 минути (земетресенията са непредвидими)
-  cron.schedule('*/2 * * * *', () => pollSeismicData());
+  //cron.schedule('*/2 * * * *', () => pollSeismicData());
 
   // NASA FIRMS пожари - на всеки 15 минути (сателитите преминават на 10-20 мин)
-  cron.schedule('*/15 * * * *', () => pollFireData());
+  cron.schedule('*/10 * * * * *', () => pollFireData());
 
   // Почисти стари алерти - веднъж дневно в 3 сутринта
   cron.schedule('0 3 * * *', () => cleanOldAlerts());
 
-  logger.info('✅ Cron jobs активни: хидроложки(5м) | сеизмичен(2м) | пожари(15м)');
+  logger.info('✅ Cron jobs активни: хидроложки(5м) | сеизмичен(2м) | пожари(10м)');
 
   // Изпълни веднага при стартиране за бърза инициализация
-  pollHydrologicalData();
-  pollSeismicData();
+  //pollHydrologicalData();
+  //pollSeismicData();
 }
 
 /**
@@ -144,7 +144,46 @@ async function pollSeismicData() {
  * https://firms.modaps.eosdis.nasa.gov/api/
  */
 async function pollFireData() {
-  logger.debug('Polling: NASA FIRMS пожари...');
+  async function pollFireData() {
+    try {
+        const url = process.env.FIRE_API_URL;
+        const response = await axios.get(url);
+
+        // 1. Convert CSV to JSON
+        const jsonArray = await csv().fromString(response.data);
+
+        if (jsonArray.length === 0) {
+            console.log("🔥 No active fires detected.");
+            return;
+        }
+
+        // 2. Loop through each fire (Use FOR...OF, not .forEach!)
+        for (const fire of jsonArray) {
+            const { latitude, longitude, bright_ti4 } = fire;
+
+            // This is where line 187 was causing the crash
+            const nearestResult = await db.query(
+                `SELECT name FROM villages 
+                 ORDER BY location <-> ST_SetSRID(ST_Point($1, $2), 4326) 
+                 LIMIT 1`, 
+                [longitude, latitude]
+            );
+
+            if (nearestResult.rows.length > 0) {
+                const villageName = nearestResult.rows[0].name;
+                console.log(`🔥 Fire near ${villageName} (Lat: ${latitude}, Lon: ${longitude})`);
+                
+                // Trigger your alert logic here if needed
+            }
+        }
+
+    } catch (error) {
+    console.error("❌ Error during fire polling:", error.message);
+    if (error.response) {
+        console.error("Data from NASA:", error.response.data);
+    }
+}
+  }
 
   try {
     // NASA FIRMS API за MODIS и VIIRS сателити

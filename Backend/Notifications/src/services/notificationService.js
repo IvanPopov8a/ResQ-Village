@@ -2,13 +2,17 @@
 // Централната логика за изпращане на известия
 // Обработва Push (WebPush) и SMS (Twilio) паралелно
 
-require('dotenv').config();
+const path = require('path');
+require('dotenv').config({ path: path.join(__dirname, '.env') });
 const webpush = require('web-push');
 const twilio = require('twilio');
-const db = require('../db');
+const db = require('../db/setup');
 const logger = require('./logger');
 
 // Конфигурация на Web Push с VAPID ключове
+console.log("VAPID Email:", process.env.VAPID_EMAIL);
+console.log("VAPID Public Key:", process.env.VAPID_PUBLIC_KEY ? "Loaded ✅" : "Missing ❌");
+
 webpush.setVapidDetails(
   process.env.VAPID_EMAIL,
   process.env.VAPID_PUBLIC_KEY,

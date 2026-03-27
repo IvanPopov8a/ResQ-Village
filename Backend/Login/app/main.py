@@ -2,6 +2,8 @@ from fastapi import FastAPI, Depends, BackgroundTasks
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 from typing import List, Optional
+from .services import trigger_node_fire_alert
+from Disaster_algorythm.disaster_probability import get_all_districts_status
 
 from .database import engine, Base, get_db
 from . import models, schemas, crud
@@ -184,3 +186,27 @@ def get_safe_location(lat: float, lng: float, current_district_id: str = ""):
         "best_option":        candidates[0] if candidates else None,
         "all_options":        candidates,
     }
+
+@app.get("/check-fire-risks")
+def check_and_trigger_alerts(db: Session = Depends(get_db)):
+    # 1. Get status from your ML/Mock algorithm
+    statuses = get_all_districts_status() #
+    
+    triggered = []
+    for status in statuses:
+        # 2. If the risk is 'Critical' or 'High' (e.g., > 0.7)
+        if status.probability >= 0.7 and status.disaster_type == "fire":
+            # 3. Find the corresponding village in your Postgres DB
+            village = db.query(models.Village).filter(models.Village.name == status.district_name).first()
+            
+            if village:
+                # 4. Trigger the Node.js Alert Engine
+                node_resp = trigger_node_fire_alert(
+                    level=3 if status.risk_level == "Critical" else 2,
+                    village_id=village.id,
+                    lat=float(village.lat),
+                    lng=float(village.lng)
+                )
+                triggered.append({"village": village.name, "node_status": node_resp})
+                
+    return {"status": "Processing complete", "alerts_sent": triggered}
