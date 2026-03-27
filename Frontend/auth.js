@@ -52,7 +52,7 @@ function doRegister(e) {
 
   users.push({ username, email, password });
   localStorage.setItem('resq_users', JSON.stringify(users));
-  showMsg('Регистрацията е успешна! Влизате…', 'success');
+  showMsg('Регистрацията е успешна!', 'success');
   setTimeout(() => loginSuccess(username), 1200);
 }
 

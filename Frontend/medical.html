@@ -10,24 +10,24 @@
 <body>
 
   <header class="navbar">
-    <a href="index.html" class="logo">🌍 ResQ Village</a>
+    <a href="index.html" class="logo">ResQ Village</a>
     <ul class="nav-links">
       <li><a href="index.html">Начало</a></li>
       <li class="dropdown">
-        <a href="#">Платформа ▼</a>
+        <a href="#">Услуги ≡</a>
         <div class="dropdown-content">
-          <a href="map.html">🗺️ Карта на риска</a>
-          <a href="alerts.html">🔔 Ранно предупреждение</a>
-          <a href="medical.html">🏥 Медицинска помощ</a>
-          <a href="guides.html">📖 Наръчници за оцеляване</a>
-          <a href="reports.html">📋 Всички сигнали</a>
+          <a href="map.html">Карта на риска</a>
+          <a href="alerts.html">Ранно предупреждение</a>
+          <a href="medical.html">Медицинска помощ</a>
+          <a href="guides.html">Наръчници за оцеляване</a>
+          <a href="reports.html">Всички сигнали</a>
         </div>
       </li>
     </ul>
     <div class="nav-auth">
       <div id="authButtons">
-        <button class="btn-nav-login" onclick="openAuth('login')">🔑 Вход</button>
-        <button class="btn-nav-register" onclick="openAuth('register')">📝 Регистрация</button>
+        <button class="btn-nav-login" onclick="openAuth('login')">Вход</button>
+        <button class="btn-nav-register" onclick="openAuth('register')">Регистрация</button>
       </div>
       <div id="userGreeting" style="display:none;">
         <div class="user-avatar" id="userAvatar">U</div>
@@ -39,20 +39,20 @@
 
   <main class="page-main">
     <div class="page-hero medical-hero">
-      <div class="page-hero-icon">🏥</div>
+      <div class="page-hero-icon"></div>
       <h1>Медицинска помощ</h1>
       <p>Намерете бързо най-близката болница или аптека при извънредна ситуация. Директни контакти и маршрути за спешна помощ.</p>
     </div>
 
     <div class="search-bar-container">
       <div class="search-bar">
-        <span>📍</span>
+        <span></span>
         <input type="text" id="citySearch" placeholder="Търсете по населено място или регион…" oninput="filterHospitals()" onkeydown="if(event.key==='Enter') filterHospitals()">
         <button class="btn-search" onclick="filterHospitals()">Търси</button>
       </div>
     </div>
 
-    <h2 class="section-title">🏥 Болници</h2>
+    <h2 class="section-title">Болници</h2>
     <div class="medical-grid" id="hospitalGrid">
 
       <div class="medical-card" data-city="софия">
@@ -187,12 +187,12 @@
 
     <!-- No results message -->
     <div id="noResults" style="display:none; text-align:center; padding:48px 20px; color:#475569;">
-      <div style="font-size:3rem; margin-bottom:16px;">🔍</div>
+      <div style="font-size:3rem; margin-bottom:16px;"></div>
       <h3 style="color:#64748b; margin-bottom:8px;">Няма намерени болници</h3>
-      <p style="font-size:0.9rem;">Опитайте с друг град — напр. „София", „Варна", „Пловдив".</p>
+      <p style="font-size:0.9rem;">Опитайте с друг град - напр. „София", „Варна", „Пловдив".</p>
     </div>
 
-    <h2 class="section-title">🚑 Спешни номера</h2>
+    <h2 class="section-title">Спешни номера</h2>
     <div class="emergency-grid">
       <div class="emergency-card">
         <div class="emergency-number">112</div>
@@ -249,7 +249,7 @@
 
       // Show loading state on the button
       const originalText = btn.innerHTML;
-      btn.innerHTML = '⏳ Локация…';
+      btn.innerHTML = 'Локация…';
       btn.disabled = true;
 
       navigator.geolocation.getCurrentPosition(
@@ -283,18 +283,18 @@
   <div id="authModal">
     <div id="authModalContent">
       <button class="modal-close" onclick="closeAuth()">✕</button>
-      <div class="auth-logo">🚑 ResQ Village</div>
+      <div class="auth-logo">ResQ Village</div>
       <div class="auth-tabs">
         <button class="auth-tab active" id="tabLogin" onclick="switchTab('login')">Вход</button>
         <button class="auth-tab" id="tabRegister" onclick="switchTab('register')">Регистрация</button>
       </div>
       <form id="loginForm" class="auth-form" onsubmit="doLogin(event)">
-        <div class="input-group"><span class="input-icon">👤</span><input type="text" id="loginUser" placeholder="Потребителско име" required></div>
+        <div class="input-group"><span class="input-icon"> 👤︎</span><input type="text" id="loginUser" placeholder="Потребителско име" required></div>
         <div class="input-group"><span class="input-icon">🔒</span><input type="password" id="loginPass" placeholder="Парола" required></div>
         <button type="submit" class="btn-auth-submit">Вход</button>
       </form>
       <form id="registerForm" class="auth-form" style="display:none;" onsubmit="doRegister(event)">
-        <div class="input-group"><span class="input-icon">👤</span><input type="text" id="regUser" placeholder="Потребителско име" required></div>
+        <div class="input-group"><span class="input-icon">👤︎</span><input type="text" id="regUser" placeholder="Потребителско име" required></div>
         <div class="input-group"><span class="input-icon">✉️</span><input type="email" id="regEmail" placeholder="Имейл" required></div>
         <div class="input-group"><span class="input-icon">🔒</span><input type="password" id="regPass" placeholder="Парола" required></div>
         <div class="input-group"><span class="input-icon">🔒</span><input type="password" id="regPass2" placeholder="Потвърдете паролата" required></div>
@@ -342,10 +342,10 @@ function doRegister(e) {
   if (password.length < 4) { showMsg('Паролата трябва да е поне 4 символа.', 'error'); return; }
   if (password !== confirm)  { showMsg('Паролите не съвпадат.', 'error'); return; }
   const users = JSON.parse(localStorage.getItem('resq_users') || '[]');
-  if (users.find(u => u.username === username)) { showMsg('Потребителското ime е заето.', 'error'); return; }
+  if (users.find(u => u.username === username)) { showMsg('Потребителското име е заето.', 'error'); return; }
   users.push({ username, email, password });
   localStorage.setItem('resq_users', JSON.stringify(users));
-  showMsg('Регистрацията е успешна! Влизате', 'success');
+  showMsg('Регистрацията е успешна!', 'success');
   setTimeout(() => loginSuccess(username), 1200);
 }
 function loginSuccess(username) {

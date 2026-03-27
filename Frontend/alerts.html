@@ -10,24 +10,24 @@
 <body>
 
   <header class="navbar">
-    <a href="index.html" class="logo">🌍 ResQ Village</a>
+    <a href="index.html" class="logo">ResQ Village</a>
     <ul class="nav-links">
       <li><a href="index.html">Начало</a></li>
       <li class="dropdown">
-        <a href="#">Платформа ▼</a>
+        <a href="#">Услуги ≡</a>
         <div class="dropdown-content">
-          <a href="map.html">🗺️ Карта на риска</a>
-          <a href="alerts.html">🔔 Ранно предупреждение</a>
-          <a href="medical.html">🏥 Медицинска помощ</a>
-          <a href="guides.html">📖 Наръчници за оцеляване</a>
-          <a href="reports.html">📋 Всички сигнали</a>
+          <a href="map.html">Карта на риска</a>
+          <a href="alerts.html">Ранно предупреждение</a>
+          <a href="medical.html">Медицинска помощ</a>
+          <a href="guides.html">Наръчници за оцеляване</a>
+          <a href="reports.html">Всички сигнали</a>
         </div>
       </li>
     </ul>
     <div class="nav-auth">
       <div id="authButtons">
-        <button class="btn-nav-login" onclick="openAuth('login')">🔑 Вход</button>
-        <button class="btn-nav-register" onclick="openAuth('register')">📝 Регистрация</button>
+        <button class="btn-nav-login" onclick="openAuth('login')">Вход</button>
+        <button class="btn-nav-register" onclick="openAuth('register')">Регистрация</button>
       </div>
       <div id="userGreeting" style="display:none;">
         <div class="user-avatar" id="userAvatar">U</div>
@@ -39,7 +39,7 @@
 
   <main class="page-main">
     <div class="page-hero alerts-hero">
-      <div class="page-hero-icon">🔔</div>
+      <div class="page-hero-icon"></div>
       <h1>Ранно предупреждение</h1>
       <p>Мониторинг на метеорологични и сеизмични данни в реално време за България. Получавайте навременни предупреждения преди настъпване на бедствие.</p>
     </div>
@@ -107,7 +107,7 @@
     </div>
 
     <div class="page-info-box">
-      <div class="info-icon">ℹ️</div>
+      <div class="info-icon"></div>
       <div>
         <strong>Данните са демонстрационни.</strong> В пълната версия на платформата тук ще се показват предупреждения в реално време от НИМХ, НИМХ-БАН и европейски сеизмични мрежи.
       </div>
@@ -118,19 +118,19 @@
   <div id="authModal">
     <div id="authModalContent">
       <button class="modal-close" onclick="closeAuth()">✕</button>
-      <div class="auth-logo">🚑 ResQ Village</div>
+      <div class="auth-logo">ResQ Village</div>
       <div class="auth-tabs">
         <button class="auth-tab active" id="tabLogin" onclick="switchTab('login')">Вход</button>
         <button class="auth-tab" id="tabRegister" onclick="switchTab('register')">Регистрация</button>
       </div>
       <form id="loginForm" class="auth-form" onsubmit="doLogin(event)">
-        <div class="input-group"><span class="input-icon">👤</span><input type="text" id="loginUser" placeholder="Потребителско име" required></div>
+        <div class="input-group"><span class="input-icon">👤︎</span><input type="text" id="loginUser" placeholder="Потребителско име" required></div>
         <div class="input-group"><span class="input-icon">🔒</span><input type="password" id="loginPass" placeholder="Парола" required></div>
         <button type="submit" class="btn-auth-submit">Вход</button>
         <p class="auth-hint">Нямате акаунт? <a href="#" onclick="switchTab('register');return false;">Регистрирайте се</a></p>
       </form>
       <form id="registerForm" class="auth-form" style="display:none;" onsubmit="doRegister(event)">
-        <div class="input-group"><span class="input-icon">👤</span><input type="text" id="regUser" placeholder="Потребителско име" required></div>
+        <div class="input-group"><span class="input-icon">👤︎</span><input type="text" id="regUser" placeholder="Потребителско име" required></div>
         <div class="input-group"><span class="input-icon">✉️</span><input type="email" id="regEmail" placeholder="Имейл" required></div>
         <div class="input-group"><span class="input-icon">🔒</span><input type="password" id="regPass" placeholder="Парола" required></div>
         <div class="input-group"><span class="input-icon">🔒</span><input type="password" id="regPass2" placeholder="Потвърдете паролата" required></div>
@@ -179,10 +179,10 @@ function doRegister(e) {
   if (password.length < 4) { showMsg('Паролата трябва да е поне 4 символа.', 'error'); return; }
   if (password !== confirm)  { showMsg('Паролите не съвпадат.', 'error'); return; }
   const users = JSON.parse(localStorage.getItem('resq_users') || '[]');
-  if (users.find(u => u.username === username)) { showMsg('Потребителското ime е заето.', 'error'); return; }
+  if (users.find(u => u.username === username)) { showMsg('Потребителското име е заето.', 'error'); return; }
   users.push({ username, email, password });
   localStorage.setItem('resq_users', JSON.stringify(users));
-  showMsg('Регистрацията е успешна! Влизате', 'success');
+  showMsg('Регистрацията е успешна!', 'success');
   setTimeout(() => loginSuccess(username), 1200);
 }
 function loginSuccess(username) {

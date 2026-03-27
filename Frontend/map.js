@@ -25,7 +25,7 @@ const map = L.map('map', {
 map.setMinZoom(map.getZoom());
 
 // Тъмна тема
-L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+L.tileLayer('https://{s}.basemaps.cartocdn.com/{z}/{x}/{y}{r}.png', {
   attribution: '© OpenStreetMap contributors, © CARTO'
 }).addTo(map);
 
@@ -54,7 +54,7 @@ let reportLatLng = null;
 let tempMarker  = null;
 let reports     = JSON.parse(localStorage.getItem('resq_reports') || '[]');
 
-const COOLDOWN_MS  = 15 * 60 * 1000; // 15 минути
+const COOLDOWN_MS  = 15*60*1000; // 15 минути
 const BLOCK_RADIUS = 0.018;           // ~2 км в градуси
 
 // Зарежда съществуващите сигнали при стартиране
@@ -66,7 +66,7 @@ function canReport(username) {
   const now      = Date.now();
   if (now - last < COOLDOWN_MS) {
     const remaining = Math.ceil((COOLDOWN_MS - (now - last)) / 60000);
-    showToast(`⏱️ Изчакай още ${remaining} мин. преди следващ сигнал.`, 'warn');
+    showToast(`Изчакай още ${remaining} мин. преди следващ сигнал.`, 'warn');
     return false;
   }
   return true;
@@ -115,7 +115,7 @@ map.on('click', function(e) {
 
   // Guard 2: Location lock
   if (isTooClose(e.latlng.lat, e.latlng.lng)) {
-    showToast('📍 Вече има сигнал в този район!', 'warn');
+    showToast('Вече има сигнал в този район!', 'warn');
     cancelReport();
     return;
   }
@@ -186,7 +186,7 @@ function submitReport() {
   reportLatLng = null;
   document.getElementById('reportBtn').style.display = 'flex';
   document.getElementById('map').style.cursor = '';
-  showToast('✅ Сигналът е изпратен успешно!', 'ok');
+  showToast('Сигналът е изпратен успешно!', 'ok');
 }
 
 
@@ -195,22 +195,22 @@ function validateDescription(text) {
   if (!text) return null; // Описанието е по избор
 
   if (text.length < 5)
-    return '⚠️ Описанието е прекалено късо — моля, добави повече детайли.';
+    return 'Описанието е прекалено късо - моля, добави повече детайли.';
 
   if (text.length > 300)
-    return '⚠️ Описанието е прекалено дълго (макс. 300 знака).';
+    return 'Описанието е прекалено дълго (макс. 300 знака).';
 
   if (/(.)\1{5,}/.test(text))
-    return '⚠️ Описанието изглежда като спам. Моля, пиши смислено описание.';
+    return 'Описанието изглежда като спам. Моля, пиши смислено описание.';
 
   if (/^[^a-zA-Z\u0400-\u04ff]+$/.test(text))
-    return '⚠️ Описанието трябва да съдържа текст, не само цифри или символи.';
+    return 'Описанието трябва да съдържа текст, не само цифри или символи.';
 
   const letters = text.replace(/[^a-zA-Z\u0400-\u04ff]/g, '');
   if (letters.length > 4) {
     const upperCount = letters.replace(/[^A-Z\u0410-\u042f]/g, '').length;
     if (upperCount / letters.length > 0.7)
-      return '⚠️ Моля, не пиши цялото с ГЛАВНИ БУКВИ.';
+      return 'Моля, не пиши цялото с ГЛАВНИ БУКВИ.';
   }
 
   const BLOCKLIST = [
@@ -226,7 +226,7 @@ function validateDescription(text) {
   for (const word of BLOCKLIST) {
     const re = new RegExp('(^|[^a-z\u0430-\u044f])' + word + '([^a-z\u0430-\u044f]|$)', 'i');
     if (re.test(lower))
-      return '⚠️ Описанието съдържа неподходящо съдържание. Моля, опишете бедствието адекватно.';
+      return 'Описанието съдържа неподходящо съдържание. Моля, опишете бедствието адекватно.';
   }
 
   return null;
@@ -294,7 +294,7 @@ function buildPopup(r, index) {
       background:rgba(74,222,128,0.15);border:1px solid rgba(74,222,128,0.35);
       border-radius:20px;padding:4px 12px;margin:6px 0;
       font-size:0.82rem;font-weight:700;color:#4ade80
-    ">✅ Потвърдено от общността</div>`;
+    ">Потвърдено от общността</div>`;
   } else {
     const dots = [1,2,3].map(n => {
       const filled = n <= confirmCount;
@@ -341,14 +341,14 @@ function buildPopup(r, index) {
         "
         onmouseover="this.style.filter='brightness(1.15)'"
         onmouseout="this.style.filter='none'"
-      >👍 Потвърди сигнала</button>`;
+      >Потвърди сигнала</button>`;
     }
   } else if (!currentUser && !r.verified) {
     confirmBtn = `<div style="
       margin-top:10px;padding:8px;
       background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);
       border-radius:8px;font-size:0.8rem;color:#475569;text-align:center
-    ">🔑 Влезте, за да потвърдите</div>`;
+    ">Влезте, за да потвърдите</div>`;
   }
 
   return `
@@ -359,7 +359,7 @@ function buildPopup(r, index) {
       }</span>
       ${statusBadge}
       ${r.desc ? `<em style="display:block;margin-top:4px;color:#94a3b8">"${r.desc}"</em>` : ''}
-      <small style="color:#475569;display:block;margin-top:6px">👤 ${r.user} — ${r.time}</small>
+      <small style="color:#475569;display:block;margin-top:6px">👤︎ ${r.user} — ${r.time}</small>
       ${confirmBtn}
     </div>
   `;
@@ -375,7 +375,7 @@ function verifyReport(index) {
   if (!r) return;
 
   if (r.user === currentUser) {
-    showToast('⚠️ Не можеш да потвърдиш собствен сигнал.', 'warn');
+    showToast('Не можеш да потвърдиш собствен сигнал.', 'warn');
     return;
   }
   if ((r.confirmations || []).includes(currentUser)) return;
@@ -388,9 +388,9 @@ function verifyReport(index) {
   if (count >= 3) {
     r.verified = true;
     if (r._marker) r._marker.setStyle({ color: '#4ade80', fillColor: '#4ade80' });
-    showToast('✅ Сигналът е потвърден от общността!', 'ok');
+    showToast('Сигналът е потвърден от общността!', 'ok');
   } else {
-    showToast(`👍 Потвърждение добавено — ${count}/3`, 'ok');
+    showToast(`Потвърждение добавено - ${count}/3`, 'ok');
   }
 
   // Запази (без непериализируемото _marker)

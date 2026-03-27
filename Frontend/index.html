@@ -12,24 +12,24 @@
 
   <!-- Navbar -->
   <header class="navbar">
-    <a href="index.html" class="logo">🌍 ResQ Village</a>
+    <a href="index.html" class="logo">ResQ Village</a>
     <ul class="nav-links">
       <li><a href="index.html">Начало</a></li>
       <li class="dropdown">
-        <a href="#">Платформа ▼</a>
+        <a href="#">Услуги ≡</a>
         <div class="dropdown-content">
-          <a href="map.html">🗺️ Карта на риска</a>
-          <a href="alerts.html">🔔 Ранно предупреждение</a>
-          <a href="medical.html">🏥 Медицинска помощ</a>
-          <a href="guides.html">📖 Наръчници за оцеляване</a>
-          <a href="reports.html">📋 Всички сигнали</a>
+          <a href="map.html">Карта на риска</a>
+          <a href="alerts.html">Ранно предупреждение</a>
+          <a href="medical.html">Медицинска помощ</a>
+          <a href="guides.html">Наръчници за оцеляване</a>
+          <a href="reports.html">Всички сигнали</a>
         </div>
       </li>
     </ul>
     <div class="nav-auth">
       <div id="authButtons">
-        <button class="btn-nav-login" onclick="openAuth('login')">🔑 Вход</button>
-        <button class="btn-nav-register" onclick="openAuth('register')">📝 Регистрация</button>
+        <button class="btn-nav-login" onclick="openAuth('login')">Вход</button>
+        <button class="btn-nav-register" onclick="openAuth('register')">Регистрация</button>
       </div>
       <div id="userGreeting" style="display:none;">
         <div class="user-avatar" id="userAvatar">U</div>
@@ -48,7 +48,7 @@
     <div class="hero-bg-orb orb3"></div>
 
     <div class="home-hero-content fade-in">
-      <div class="hero-badge">🛡️ Платформа за защита при бедствия</div>
+      <div class="hero-badge">Платформа за защита при бедствия</div>
       <h1 class="hero-title">ResQ Village</h1>
       <p class="hero-subtitle">Нито едно село не остава само при бедствие</p>
       <p class="hero-desc">
@@ -56,13 +56,12 @@
         всичко на едно място за цяла България.
       </p>
       <div class="hero-actions">
-        <a href="map.html" class="btn-hero-primary">🗺️ Виж картата</a>
-        <a href="reports.html" class="btn-hero-secondary">📋 Всички сигнали</a>
+        <a href="map.html" class="btn-hero-primary">Виж картата</a>
+        <a href="reports.html" class="btn-hero-secondary">Всички сигнали</a>
       </div>
     </div>
 
     <div class="hero-scroll-hint">
-      <span>Превърти надолу</span>
       <div class="scroll-arrow">↓</div>
     </div>
   </section>
@@ -71,7 +70,7 @@
        2. БЪРЗИ СТАТИСТИКИ
   ══════════════════════════════════════ -->
   <section class="home-section">
-    <div class="section-label">📊 Активни сигнали</div>
+    <div class="section-label">Активни сигнали</div>
     <h2 class="section-heading">Текущо положение в България</h2>
     <div class="stats-grid" id="statsGrid">
       <!-- Попълва се от JS -->
@@ -83,13 +82,12 @@
        4. ПОСЛЕДНИ СИГНАЛИ (Live feel)
   ══════════════════════════════════════ -->
   <section class="home-section">
-    <div class="section-label">🔴 Живо</div>
     <h2 class="section-heading">Последни сигнали</h2>
     <div class="recent-grid" id="recentGrid">
       <!-- Попълва се от JS -->
     </div>
     <div class="recent-empty" id="recentEmpty" style="display:none;">
-      <div style="font-size:2.5rem;margin-bottom:12px">📭</div>
+      <div style="font-size:2.5rem;margin-bottom:12px"></div>
       <p>Все още няма регистрирани сигнали.</p>
       <a href="map.html" class="btn-hero-primary" style="margin-top:16px">Бъди първият</a>
     </div>
@@ -104,20 +102,20 @@
   <div id="authModal">
     <div id="authModalContent">
       <button class="modal-close" onclick="closeAuth()">✕</button>
-      <div class="auth-logo">🚑 ResQ Village</div>
+      <div class="auth-logo">ResQ Village</div>
       <div class="auth-tabs">
         <button class="auth-tab active" id="tabLogin" onclick="switchTab('login')">Вход</button>
         <button class="auth-tab" id="tabRegister" onclick="switchTab('register')">Регистрация</button>
       </div>
       <form id="loginForm" class="auth-form" onsubmit="doLogin(event)">
-        <div class="input-group"><span class="input-icon">👤</span><input type="text" id="loginUser" placeholder="Потребителско име" required></div>
+        <div class="input-group"><span class="input-icon">👤︎</span><input type="text" id="loginUser" placeholder="Потребителско име" required></div>
         <div class="input-group"><span class="input-icon">🔒</span><input type="password" id="loginPass" placeholder="Парола" required></div>
         <button type="submit" class="btn-auth-submit">Вход</button>
         <p class="auth-hint">Нямате акаунт? <a href="#" onclick="switchTab('register');return false;">Регистрирайте се</a></p>
       </form>
       <form id="registerForm" class="auth-form" style="display:none;" onsubmit="doRegister(event)">
-        <div class="input-group"><span class="input-icon">👤</span><input type="text" id="regUser" placeholder="Потребителско име" required></div>
-        <div class="input-group"><span class="input-icon">✉️</span><input type="email" id="regEmail" placeholder="Имейл" required></div>
+        <div class="input-group"><span class="input-icon">👤︎</span><input type="text" id="regUser" placeholder="Потребителско име" required></div>
+        <div class="input-group"><span class="input-icon">@</span><input type="email" id="regEmail" placeholder="Имейл" required></div>
         <div class="input-group"><span class="input-icon">🔒</span><input type="password" id="regPass" placeholder="Парола" required></div>
         <div class="input-group"><span class="input-icon">🔒</span><input type="password" id="regPass2" placeholder="Потвърдете паролата" required></div>
         <button type="submit" class="btn-auth-submit">Регистрация</button>
@@ -165,10 +163,10 @@ function doRegister(e) {
   if (password.length < 4) { showMsg('Паролата трябва да е поне 4 символа.', 'error'); return; }
   if (password !== confirm)  { showMsg('Паролите не съвпадат.', 'error'); return; }
   const users = JSON.parse(localStorage.getItem('resq_users') || '[]');
-  if (users.find(u => u.username === username)) { showMsg('Потребителското ime е заето.', 'error'); return; }
+  if (users.find(u => u.username === username)) { showMsg('Потребителското име е заето.', 'error'); return; }
   users.push({ username, email, password });
   localStorage.setItem('resq_users', JSON.stringify(users));
-  showMsg('Регистрацията е успешна! Влизате', 'success');
+  showMsg('Регистрацията е успешна!', 'success');
   setTimeout(() => loginSuccess(username), 1200);
 }
 function loginSuccess(username) {
@@ -216,12 +214,12 @@ document.addEventListener('DOMContentLoaded', function () {
 
     /* ── Statistics ── */
     const TYPE_LABELS = {
-      fire: '🔥 Пожари',
-      flood: '🌊 Наводнения',
-      earthquake: '🌍 Земетресения',
-      storm: '⛈️ Бури',
-      landslide: '🏔️ Свлачища',
-      other: '⚠️ Друго'
+      fire: 'Пожари',
+      flood: 'Наводнения',
+      earthquake: 'Земетресения',
+      storm: 'Бури',
+      landslide: 'Свлачища',
+      other: 'Друго'
     };
     const TYPE_COLORS = {
       fire: '#ef4444',
@@ -244,9 +242,9 @@ document.addEventListener('DOMContentLoaded', function () {
       const high     = reports.filter(r => r.risk === 'high').length;
 
       const summaryCards = [
-        { icon: '📡', value: total,    label: 'Общо сигнали',       color: '#38bdf8' },
-        { icon: '✅', value: verified, label: 'Потвърдени',          color: '#4ade80' },
-        { icon: '🔴', value: high,     label: 'Висок риск',          color: '#ef4444' },
+        { icon: '', value: total,    label: 'Общо сигнали',       color: '#38bdf8' },
+        { icon: '', value: verified, label: 'Потвърдени',          color: '#4ade80' },
+        { icon: '', value: high,     label: 'Висок риск',          color: '#ef4444' },
       ];
 
       let html = summaryCards.map(c => `
@@ -270,7 +268,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
       if (total === 0) {
         html = `<div class="stat-card stat-empty">
-          <div style="font-size:2rem;margin-bottom:8px">📭</div>
           <div class="stat-label">Няма регистрирани сигнали</div>
         </div>`;
       }
@@ -299,8 +296,8 @@ document.addEventListener('DOMContentLoaded', function () {
       grid.innerHTML = latest.map(r => {
         const color   = RISK_COLOR[r.risk] || '#94a3b8';
         const verified = r.verified
-          ? '<span class="recent-badge verified">✅ Потвърден</span>'
-          : '<span class="recent-badge unverified">⚠️ Непотвърден</span>';
+          ? '<span class="recent-badge verified">Потвърден</span>'
+          : '<span class="recent-badge unverified">Непотвърден</span>';
         return `
           <div class="recent-card">
             <div class="recent-card-top">
@@ -309,7 +306,7 @@ document.addEventListener('DOMContentLoaded', function () {
             </div>
             <div class="recent-risk" style="color:${color}">● Риск: ${RISK_LABEL[r.risk] || r.risk}</div>
             ${r.desc ? `<p class="recent-desc">"${r.desc}"</p>` : ''}
-            <div class="recent-meta">👤 ${r.user} &nbsp;·&nbsp; 🕐 ${r.time}</div>
+            <div class="recent-meta">👤︎ ${r.user} &nbsp;·&nbsp;  ${r.time}</div>
             <a href="map.html" class="recent-link">Виж на картата →</a>
           </div>
         `;

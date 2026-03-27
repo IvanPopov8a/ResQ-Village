@@ -12,24 +12,24 @@
 
   <!-- Навигационна лента -->
   <header class="navbar">
-    <a href="index.html" class="logo">🌍 ResQ Village</a>
+    <a href="index.html" class="logo">ResQ Village</a>
     <ul class="nav-links">
       <li><a href="index.html">Начало</a></li>
       <li class="dropdown">
-        <a href="#">Платформа ▼</a>
+        <a href="#">Услуги ≡</a>
         <div class="dropdown-content">
-          <a href="map.html">🗺️ Карта на риска</a>
-          <a href="alerts.html">🔔 Ранно предупреждение</a>
-          <a href="medical.html">🏥 Медицинска помощ</a>
-          <a href="guides.html">📖 Наръчници за оцеляване</a>
-          <a href="reports.html">📋 Всички сигнали</a>
+          <a href="map.html">Карта на риска</a>
+          <a href="alerts.html">Ранно предупреждение</a>
+          <a href="medical.html">Медицинска помощ</a>
+          <a href="guides.html">Наръчници за оцеляване</a>
+          <a href="reports.html">Всички сигнали</a>
         </div>
       </li>
     </ul>
     <div class="nav-auth">
       <div id="authButtons">
-        <button class="btn-nav-login" onclick="openAuth('login')">🔑 Вход</button>
-        <button class="btn-nav-register" onclick="openAuth('register')">📝 Регистрация</button>
+        <button class="btn-nav-login" onclick="openAuth('login')">Вход</button>
+        <button class="btn-nav-register" onclick="openAuth('register')">Регистрация</button>
       </div>
       <div id="userGreeting" style="display:none;">
         <div class="user-avatar" id="userAvatar">U</div>
@@ -42,13 +42,10 @@
 <div id="map"></div>
 
 <!-- Floating Report Button -->
-<button class="btn-report" id="reportBtn" onclick="startReport()">
-  🚨 Сигнализирай за бедствие
-</button>
+<button class="btn-report" id="reportBtn" onclick="startReport()">Сигнализирай за бедствие</button>
 
 <!-- Report hint banner -->
-<div class="report-hint" id="reportHint" style="display:none;">
-  📍 Кликнете върху картата, за да поставите маркер
+<div class="report-hint" id="reportHint" style="display:none;">Кликнете върху картата, за да поставите маркер
   <button class="report-hint-cancel" onclick="cancelReport()">✕ Отказ</button>
 </div>
 
@@ -56,16 +53,16 @@
 <div id="reportModal" style="display:none;">
   <div id="reportModalContent">
     <button class="modal-close" onclick="closeReport()">✕</button>
-    <h3 class="report-title">🚨 Сигнал за бедствие</h3>
+    <h3 class="report-title">Сигнал за бедствие</h3>
 
     <label class="report-label">Тип бедствие</label>
     <select id="reportType" class="report-select">
-      <option value="fire">🔥 Пожар</option>
-      <option value="flood">🌊 Наводнение</option>
-      <option value="earthquake">🌍 Земетресение</option>
-      <option value="storm">⛈️ Буря</option>
-      <option value="landslide">🏔️ Свлачище</option>
-      <option value="other">⚠️ Друго</option>
+      <option value="fire">Пожар</option>
+      <option value="flood">Наводнение</option>
+      <option value="earthquake">Земетресение</option>
+      <option value="storm">Буря</option>
+      <option value="landslide">Свлачище</option>
+      <option value="other">Друго</option>
     </select>
 
     <label class="report-label">Ниво на риск</label>
@@ -79,19 +76,19 @@
     <textarea id="reportDesc" class="report-textarea" placeholder="Какво наблюдавате? Например: голям пожар край село…" rows="3" oninput="clearDescError()"></textarea>
     <p id="descError" class="desc-error" style="display:none;"></p>
 
-    <button class="btn-report-submit" onclick="askConfirmReport()">📤 Изпрати сигнал</button>
+    <button class="btn-report-submit" onclick="askConfirmReport()">Изпрати сигнал</button>
   </div>
 </div>
 
 <!-- Confirmation Modal -->
 <div id="confirmModal" style="display:none;">
   <div id="confirmModalContent">
-    <div class="confirm-icon">⚠️</div>
-    <h3 class="confirm-title">Потвърди сигнала</h3>
-    <p class="confirm-body">Сигурен ли си, че искаш да подадеш сигнал за бедствие на тази локация?<br><br><strong>Подаването на фалшиви сигнали е нарушение на правилата.</strong></p>
+    <div class="confirm-icon"></div>
+    <h3 class="confirm-title">Потвърди сигнала!</h3>
+    <p class="confirm-body">Сигурен ли си, че искаш да подадеш сигнал за бедствие на тази локация?<br><br><strong>Подаването на фалшиви сигнали е незаконно.</strong></p>
     <div class="confirm-buttons">
       <button class="btn-confirm-cancel" onclick="closeConfirm()">✕ Отказ</button>
-      <button class="btn-confirm-ok" onclick="submitReport()">✅ Да, изпрати</button>
+      <button class="btn-confirm-ok" onclick="submitReport()">Да, изпрати</button>
     </div>
   </div>
 </div>
@@ -106,19 +103,19 @@
 <div id="authModal" style="display:none;">
   <div id="authModalContent">
     <button class="modal-close" onclick="closeAuth()">✕</button>
-    <div class="auth-logo">🚑 ResQ Village</div>
+    <div class="auth-logo">ResQ Village</div>
     <div class="auth-tabs">
       <button class="auth-tab active" id="tabLogin" onclick="switchTab('login')">Вход</button>
       <button class="auth-tab" id="tabRegister" onclick="switchTab('register')">Регистрация</button>
     </div>
     <form id="loginForm" class="auth-form" onsubmit="doLogin(event)">
-      <div class="input-group"><span class="input-icon">👤</span><input type="text" id="loginUser" placeholder="Потребителско име" required></div>
+      <div class="input-group"><span class="input-icon">👤︎</span><input type="text" id="loginUser" placeholder="Потребителско име" required></div>
       <div class="input-group"><span class="input-icon">🔒</span><input type="password" id="loginPass" placeholder="Парола" required></div>
       <button type="submit" class="btn-auth-submit">Вход</button>
       <p class="auth-hint">Нямате акаунт? <a href="#" onclick="switchTab('register');return false;">Регистрирайте се</a></p>
     </form>
     <form id="registerForm" class="auth-form" style="display:none;" onsubmit="doRegister(event)">
-      <div class="input-group"><span class="input-icon">👤</span><input type="text" id="regUser" placeholder="Потребителско име" required></div>
+      <div class="input-group"><span class="input-icon">👤︎</span><input type="text" id="regUser" placeholder="Потребителско име" required></div>
       <div class="input-group"><span class="input-icon">✉️</span><input type="email" id="regEmail" placeholder="Имейл" required></div>
       <div class="input-group"><span class="input-icon">🔒</span><input type="password" id="regPass" placeholder="Парола" required></div>
       <div class="input-group"><span class="input-icon">🔒</span><input type="password" id="regPass2" placeholder="Потвърдете паролата" required></div>
@@ -176,7 +173,7 @@ function doRegister(e) {
   if (users.find(u => u.username === username)) { showMsg('Потребителското име е заето.', 'error'); return; }
   users.push({ username, email, password });
   localStorage.setItem('resq_users', JSON.stringify(users));
-  showMsg('Регистрацията е успешна! Влизате...', 'success');
+  showMsg('Регистрацията е успешна!', 'success');
   setTimeout(() => loginSuccess(username), 1200);
 }
 function loginSuccess(username) {
@@ -253,7 +250,7 @@ map.on('click', function(e) {
   const last = parseInt(localStorage.getItem(key) || '0', 10);
   if (Date.now() - last < COOLDOWN_MS) {
     const rem = Math.ceil((COOLDOWN_MS - (Date.now() - last)) / 60000);
-    showToast(`⏱️ Изчакай още ${rem} мин. преди нов сигнал.`, 'warn');
+    showToast(`Изчакай още ${rem} мин. преди нов сигнал.`, 'warn');
     cancelReport();
     return;
   }
@@ -263,7 +260,7 @@ map.on('click', function(e) {
     return Math.sqrt(Math.pow(d.lat - e.latlng.lat, 2) + Math.pow(d.lng - e.latlng.lng, 2)) < BLOCK_RADIUS;
   });
   if (tooClose) {
-    showToast('📍 Вече има сигнал в този район!', 'warn');
+    showToast('Вече има сигнал в този район!', 'warn');
     cancelReport();
     return;
   }
@@ -285,7 +282,7 @@ function closeReport() {
 
 function askConfirmReport() {
   if (!reportLatLng) {
-    showToast("📍 Моля, първо изберете място на картата!", "warn");
+    showToast("Моля, първо изберете място на картата!", "warn");
     return;
   }
   const desc  = document.getElementById('reportDesc').value.trim();
@@ -324,17 +321,17 @@ function submitReport() {
   document.getElementById('reportDesc').value = '';
   document.getElementById('confirmModal').style.display = 'none';
   cancelReport();
-  showToast('✅ Сигналът е изпратен успешно!', 'ok');
+  showToast('Сигналът е изпратен успешно!', 'ok');
 }
 
 function validateDescription(text) {
   if (!text) return null;
-  if (text.length < 5) return '⚠️ Описанието е твърде късо.';
-  if (text.length > 300) return '⚠️ Описанието е твърде дълго.';
+  if (text.length < 5) return 'Описанието е твърде късо.';
+  if (text.length > 300) return 'Описанието е твърде дълго.';
   const BLOCKLIST = ['test', 'asdf', 'fuck', 'shit', 'кур', 'еба'];
   const lower = text.toLowerCase();
   for (const word of BLOCKLIST) {
-    if (lower.includes(word)) return '⚠️ Неподходящо съдържание.';
+    if (lower.includes(word)) return 'Неподходящо съдържание.';
   }
   return null;
 }
@@ -374,7 +371,7 @@ function addMarker(r, index) {
       <strong>${emoji} ${label}</strong><br>
       <span style="color:${color}">● Риск: ${r.risk}</span><br>
       ${r.desc ? `<em>"${r.desc}"</em><br>` : ''}
-      <small>👤 ${r.user} — ${r.time}</small>
+      <small>👤︎ ${r.user} — ${r.time}</small>
     </div>
   `);
 }
