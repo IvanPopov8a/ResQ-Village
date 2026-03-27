@@ -122,6 +122,7 @@
     </div>
   </div>
 
+  <script src="api.js"></script>
   <script src="auth.js"></script>
   <script>
     /* ── Page fade-in ── */
@@ -150,22 +151,32 @@
       other: '#fbbf24'
     };
 
-    function renderStats() {
-      const allReports = JSON.parse(localStorage.getItem('resq_reports') || '[]');
-      const reports = allReports.filter(r => r.verified === true);
-      const grid    = document.getElementById('statsGrid');
+    async function renderStats() {
+      const grid = document.getElementById('statsGrid');
+      const data = await window.api.getStatus();
 
+      if (!data || data.error) {
+        grid.innerHTML = `<div class="stat-card stat-empty"><div class="stat-label">Няма данни за риска</div></div>`;
+        return;
+      }
+
+      // Aggregate counts from real-time status
       const counts = {};
-      reports.forEach(r => { counts[r.type] = (counts[r.type] || 0) + 1; });
+      let totalRisks = 0;
+      data.forEach(item => {
+        if (item.has_disaster) {
+          counts[item.disaster_type] = (counts[item.disaster_type] || 0) + 1;
+          totalRisks++;
+        }
+      });
 
-      const total    = reports.length;
-      const unverified = allReports.filter(r => !r.verified).length;
-      const high     = reports.filter(r => r.risk === 'high').length;
+      const high = data.filter(r => r.risk_level === 'High' || r.risk_level === 'Critical').length;
+      const safe = data.filter(r => r.risk_level === 'Low').length;
 
       const summaryCards = [
-        { icon: '🛡️', value: total,    label: 'Потвърдени сигнали', color: '#4ade80' },
-        { icon: '⏳', value: unverified, label: 'В изчакване',      color: '#fbbf24' },
-        { icon: '🚨', value: high,     label: 'С висок риск',       color: '#ef4444' },
+        { icon: '🛡️', value: totalRisks, label: 'Активни заплахи', color: '#4ade80' },
+        { icon: '✅', value: safe,       label: 'Безопасни зони',  color: '#fbbf24' },
+        { icon: '🚨', value: high,       label: 'Критичен риск',   color: '#ef4444' },
       ];
 
       let html = summaryCards.map(c => `
@@ -176,7 +187,7 @@
         </div>
       `).join('');
 
-      // Per-type counts (only show types that have at least 1)
+      // Per-type counts
       Object.entries(counts).forEach(([type, count]) => {
         const color = TYPE_COLORS[type] || '#94a3b8';
         html += `
@@ -187,48 +198,40 @@
         `;
       });
 
-      if (total === 0) {
-        html = `<div class="stat-card stat-empty">
-          <div class="stat-label">Няма регистрирани сигнали</div>
-        </div>`;
-      }
-
       grid.innerHTML = html;
     }
 
-    /* ── Recent reports ── */
-    function renderRecent() {
-      const allReports = JSON.parse(localStorage.getItem('resq_reports') || '[]');
-      const reports = allReports.filter(r => r.verified === true);
-      const grid    = document.getElementById('recentGrid');
-      const empty   = document.getElementById('recentEmpty');
+    /* ── Recent reports (Live feel from Status) ── */
+    async function renderRecent() {
+      const grid  = document.getElementById('recentGrid');
+      const empty = document.getElementById('recentEmpty');
+      const data  = await window.api.getStatus();
 
-      if (reports.length === 0) {
+      const activeDistricts = data ? data.filter(r => r.has_disaster) : [];
+
+      if (activeDistricts.length === 0) {
         grid.style.display = 'none';
         empty.style.display = 'block';
         return;
       }
 
-      const RISK_COLOR = { low: '#4ade80', medium: '#fbbf24', high: '#ef4444' };
-      const RISK_LABEL = { low: 'Нисък', medium: 'Среден', high: 'Висок' };
+      const RISK_COLOR = { Low: '#4ade80', Medium: '#fbbf24', High: '#ef4444', Critical: '#b91c1c' };
+      const RISK_LABEL = { Low: 'Нисък', Medium: 'Среден', High: 'Висок', Critical: 'Критичен' };
       const TYPE_EMOJI = { fire:'🔥', flood:'🌊', earthquake:'🌍', storm:'⛈️', landslide:'🏔️', other:'⚠️' };
       const TYPE_NAME  = { fire:'Пожар', flood:'Наводнение', earthquake:'Земетресение', storm:'Буря', landslide:'Свлачище', other:'Друго' };
 
-      const latest = [...reports].reverse().slice(0, 3);
+      const latest = activeDistricts.slice(0, 3);
       grid.innerHTML = latest.map(r => {
-        const color   = RISK_COLOR[r.risk] || '#94a3b8';
-        const verified = r.verified
-          ? '<span class="recent-badge verified">Потвърден</span>'
-          : '<span class="recent-badge unverified">Непотвърден</span>';
+        const color = RISK_COLOR[r.risk_level] || '#94a3b8';
         return `
           <div class="recent-card">
             <div class="recent-card-top">
-              <span class="recent-type">${TYPE_EMOJI[r.type] || '⚠️'} ${TYPE_NAME[r.type] || r.type}</span>
-              ${verified}
+              <span class="recent-type">${TYPE_EMOJI[r.disaster_type] || '⚠️'} ${TYPE_NAME[r.disaster_type] || r.disaster_type}</span>
+              <span class="recent-badge verified">Реално време</span>
             </div>
-            <div class="recent-risk" style="color:${color}">● Риск: ${RISK_LABEL[r.risk] || r.risk}</div>
-            ${r.desc ? `<p class="recent-desc">"${r.desc}"</p>` : ''}
-            <div class="recent-meta">👤︎ ${r.user} &nbsp;·&nbsp;  ${r.time}</div>
+            <div class="recent-risk" style="color:${color}">● Риск: ${RISK_LABEL[r.risk_level] || r.risk_level}</div>
+            <p class="recent-desc">Засечен риск в регион <b>${r.district_name}</b>.</p>
+            <div class="recent-meta">📍 ${r.district_id} &nbsp;·&nbsp; Вероятност: ${Math.round(r.probability * 100)}%</div>
             <a href="map.html" class="recent-link">Виж на картата →</a>
           </div>
         `;

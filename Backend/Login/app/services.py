@@ -1,7 +1,7 @@
 import requests
 import os
 
-NODE_SERVICE_URL = os.getenv("NODE_SERVICE_URL", "http://localhost:3000")
+NODE_SERVICE_URL = os.getenv("NODE_SERVICE_URL")
 
 def trigger_node_alert(disaster_type, level, village_id, lat, lng):
     """

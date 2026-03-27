@@ -1,7 +1,5 @@
 /* ===================== AUTH.JS — ResQ Village ===================== */
 
-const API_BASE_URL = 'http://127.0.0.1:8000';
-
 function openAuth(tab) {
   document.getElementById('authModal').style.display = 'flex';
   switchTab(tab || 'login');
@@ -30,15 +28,9 @@ async function doLogin(e) {
   const password = document.getElementById('loginPass').value.trim();
   
   try {
-    const response = await fetch(`${API_BASE_URL}/login`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, password })
-    });
+    const data = await window.api.login(email, password);
     
-    const data = await response.json();
-    
-    if (response.ok && data.access_token) {
+    if (data.access_token) {
       localStorage.setItem('resq_token', data.access_token);
       loginSuccess(email);
     } else {
@@ -66,15 +58,9 @@ async function doRegister(e) {
   }
 
   try {
-    const response = await fetch(`${API_BASE_URL}/users`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, password })
-    });
+    const data = await window.api.register(email, password);
     
-    const data = await response.json();
-    
-    if (response.ok) {
+    if (!data.error) {
       showMsg('Регистрацията е успешна! Влизане...', 'success');
       // Automatically log in using the credentials we just registered
       setTimeout(() => {
@@ -84,14 +70,7 @@ async function doRegister(e) {
         document.getElementById('loginForm').dispatchEvent(new Event('submit', { cancelable: true }));
       }, 1500);
     } else {
-      // Backend sent an error (maybe user exists, or password weak)
-      let errorText = data.error || 'Възникна грешка при регистрация.';
-      if (data.detail && Array.isArray(data.detail)) {
-         errorText = data.detail.map(d => d.msg).join(', '); // For FastAPI validation errors
-      } else if (data.detail) {
-         errorText = data.detail; // if detail is a string
-      }
-      showMsg(errorText, 'error');
+      showMsg(data.error || 'Възникна грешка при регистрация.', 'error');
     }
   } catch (error) {
     showMsg('Грешка при свързване със сървъра.', 'error');

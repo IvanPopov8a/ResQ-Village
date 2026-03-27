@@ -2,7 +2,7 @@ from fastapi import FastAPI, Depends, BackgroundTasks
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 from typing import List, Optional
-from .services import trigger_node_fire_alert
+from .services import trigger_node_alert
 from Disaster_algorythm.disaster_probability import get_all_districts_status
 
 from .database import engine, Base, get_db
@@ -187,26 +187,42 @@ def get_safe_location(lat: float, lng: float, current_district_id: str = ""):
         "all_options":        candidates,
     }
 
-@app.get("/check-fire-risks")
-def check_and_trigger_alerts(db: Session = Depends(get_db)):
-    # 1. Get status from your ML/Mock algorithm
-    statuses = get_all_districts_status() #
+# ---------------------------------------------------------------------------
+# Global Status & Automated Alerts (The "Pulse" of the app)
+# ---------------------------------------------------------------------------
+
+@app.get(
+    "/get-status",
+    response_model=List[DistrictStatus],
+    summary="Get current disaster status across all districts and trigger alerts if needed",
+    tags=["Disaster Risk"],
+)
+def get_status(db: Session = Depends(get_db)):
+    """
+    This is the core periodic function. When called:
+    1. It fetches the latest disaster probabilities for all districts.
+    2. It scans for High/Critical risks and automatically triggers the Node.js Alert Engine.
+    3. It returns the current status so the frontend can update its map.
+    """
+    statuses = get_all_districts_status()
     
-    triggered = []
+    # Automatic logic: Trigger alerts for any existing 'fire' with high probability
     for status in statuses:
-        # 2. If the risk is 'Critical' or 'High' (e.g., > 0.7)
-        if status.probability >= 0.7 and status.disaster_type == "fire":
-            # 3. Find the corresponding village in your Postgres DB
-            village = db.query(models.Village).filter(models.Village.name == status.district_name).first()
-            
-            if village:
-                # 4. Trigger the Node.js Alert Engine
-                node_resp = trigger_node_fire_alert(
-                    level=3 if status.risk_level == "Critical" else 2,
-                    village_id=village.id,
-                    lat=float(village.lat),
-                    lng=float(village.lng)
-                )
-                triggered.append({"village": village.name, "node_status": node_resp})
-                
-    return {"status": "Processing complete", "alerts_sent": triggered}
+        if status.probability >= 0.7:
+             # Find village record to get ID and exact coordinates
+             village = db.query(models.Village).filter(models.Village.name == status.district_name).first()
+             if village:
+                 trigger_node_alert(
+                     disaster_type=status.disaster_type,
+                     level=3 if status.risk_level == "Critical" else 2,
+                     village_id=village.id,
+                     lat=float(village.lat),
+                     lng=float(village.lng)
+                 )
+    
+    return statuses
+
+@app.get("/check-fire-risks", include_in_schema=False)
+def legacy_check_fire_risks(db: Session = Depends(get_db)):
+    """Wrapper for backward compatibility if needed, though /get-status is preferred."""
+    return get_status(db)
