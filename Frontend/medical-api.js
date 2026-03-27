@@ -27,7 +27,10 @@ async function fetchRealHospitals() {
     try {
         const response = await fetch(OVERPASS_API_URL, {
             method: "POST",
-            body: OVERPASS_QUERY
+            headers: {
+                "Content-Type": "application/x-www-form-urlencoded"
+            },
+            body: "data=" + encodeURIComponent(OVERPASS_QUERY)
         });
 
         if (!response.ok) throw new Error("Failed to fetch data from Overpass API");

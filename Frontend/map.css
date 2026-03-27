@@ -468,12 +468,241 @@
 }
 
 
-/* ── 8. Marker pulse animation ──────────────────────────*/
-@keyframes markerPulse {
-  0%, 100% { opacity: 0.8; }
-  50%      { opacity: 0.4; }
+
+/* ── 9. Map Sidebar ─────────────────────────────────────*/
+.map-sidebar {
+  position: fixed;
+  top: 65px; /* Navbar height */
+  left: -400px; /* Start hidden */
+  width: 400px;
+  height: calc(100vh - 65px);
+  background: rgba(15, 23, 42, 0.95);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  z-index: 1200;
+  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  border-right: 1px solid rgba(255,255,255,0.1);
+  display: flex;
+  flex-direction: column;
 }
 
-.pulse-marker {
-  animation: markerPulse 1.5s ease-in-out infinite;
+.map-sidebar.open {
+  transform: translateX(400px);
+  box-shadow: 10px 0 40px rgba(0,0,0,0.6);
+}
+
+.sidebar-toggle-btn {
+  position: absolute;
+  top: 15px;
+  right: -55px; /* Stick out when closed */
+  width: 45px;
+  height: 45px;
+  background: #3b82f6;
+  color: white;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  z-index: 1201;
+  font-size: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 4px 0 16px rgba(59, 130, 246, 0.4);
+  transition: background 0.2s, right 0.4s;
+}
+
+.map-sidebar.open .sidebar-toggle-btn {
+  background: #ef4444;
+}
+
+.sidebar-inner {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+}
+
+.sidebar-tabs {
+  display: flex;
+  background: rgba(0,0,0,0.2);
+  padding: 6px;
+  gap: 4px;
+}
+
+.sidebar-tab {
+  flex: 1;
+  background: transparent;
+  border: none;
+  padding: 12px;
+  color: #94a3b8;
+  font-family: 'Outfit', sans-serif;
+  font-weight: 600;
+  font-size: 0.9rem;
+  cursor: pointer;
+  border-radius: 8px;
+  transition: background 0.2s, color 0.2s;
+}
+
+.sidebar-tab.active {
+  background: rgba(255,255,255,0.08);
+  color: #fff;
+}
+
+.sidebar-section {
+  display: none;
+  flex: 1;
+  flex-direction: column;
+  overflow-y: auto;
+  padding: 20px;
+}
+
+.sidebar-section.active {
+  display: flex;
+}
+
+.sidebar-header h3 {
+  color: #fff;
+  font-size: 1.25rem;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+
+.sidebar-header p {
+  color: #94a3b8;
+  font-size: 0.85rem;
+  line-height: 1.5;
+  margin-bottom: 24px;
+}
+
+.sidebar-search {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+
+.sidebar-search input {
+  flex: 1;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.1);
+  padding: 10px 14px;
+  border-radius: 10px;
+  color: #fff;
+  font-family: 'Outfit', sans-serif;
+  font-size: 0.9rem;
+}
+
+.sidebar-search button {
+  background: #3b82f6;
+  border: none;
+  width: 42px;
+  height: 42px;
+  border-radius: 10px;
+  color: white;
+  cursor: pointer;
+}
+
+.sidebar-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.list-loading, .list-empty {
+  text-align: center;
+  padding: 40px 20px;
+  color: #64748b;
+  font-size: 0.9rem;
+}
+
+/* Sidebar Alert Card */
+.sidebar-alert-card {
+  background: rgba(255,255,255,0.03);
+  border-left: 4px solid #94a3b8;
+  padding: 16px;
+  border-radius: 0 10px 10px 0;
+  transition: background 0.2s;
+}
+
+.sidebar-alert-card.high { border-left-color: #ef4444; }
+.sidebar-alert-card.medium { border-left-color: #fbbf24; }
+.sidebar-alert-card.low { border-left-color: #4ade80; }
+
+.sidebar-alert-card h4 {
+  color: #fff;
+  font-size: 1rem;
+  font-weight: 700;
+  margin-bottom: 4px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.sidebar-alert-card p {
+  color: #94a3b8;
+  font-size: 0.82rem;
+  line-height: 1.4;
+  margin-bottom: 8px;
+}
+
+.sidebar-alert-time {
+  font-size: 0.75rem;
+  color: #64748b;
+  font-weight: 500;
+}
+
+/* Sidebar Hospital Card */
+.sidebar-hospital-card {
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.08);
+  padding: 16px;
+  border-radius: 12px;
+  transition: transform 0.2s, border-color 0.2s;
+}
+
+.sidebar-hospital-card:hover {
+  border-color: rgba(59, 130, 246, 0.4);
+  transform: translateY(-2px);
+}
+
+.sidebar-hospital-card h4 {
+  color: #fff;
+  font-size: 0.95rem;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+
+.sidebar-hospital-city {
+  display: block;
+  font-size: 0.78rem;
+  color: #3b82f6;
+  font-weight: 600;
+  margin-bottom: 10px;
+}
+
+.sidebar-hospital-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #94a3b8;
+  font-size: 0.8rem;
+  margin-bottom: 4px;
+}
+
+.sidebar-hospital-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 14px;
+}
+
+.btn-sidebar-route {
+  flex: 1;
+  background: #3b82f6;
+  color: white;
+  border: none;
+  padding: 8px;
+  border-radius: 8px;
+  font-family: inherit;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
 }
