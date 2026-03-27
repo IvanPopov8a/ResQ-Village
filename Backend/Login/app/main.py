@@ -9,6 +9,7 @@ from Disaster_algorythm.disaster_probability import get_all_districts_status, Di
 
 app = FastAPI(title="ResQ Village API", version="1.0.0")
 
+
 # Allow frontend (e.g. React / Vite dev server) to reach the API
 app.add_middleware(
     CORSMiddleware,
@@ -87,6 +88,17 @@ def get_districts_status():
     > ML model will replace it without changing this endpoint's contract.
     """
     return get_all_districts_status()
+
+@app.post("/refresh")
+def refresh_token(refresh_token: str, db: Session = Depends(get_db)):
+    # 1. Decode and validate the refresh token
+    email = decode_access_token(refresh_token)
+    if not email:
+        raise HTTPException(status_code=401, detail="Invalid refresh token")
+    
+    # 2. Generate a fresh ACCESS token
+    new_access_token = create_access_token({"sub": email})
+    return {"access_token": new_access_token, "token_type": "bearer"}
 
 
 
