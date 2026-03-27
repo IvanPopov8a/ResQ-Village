@@ -56,7 +56,7 @@
     <h2 class="section-title">Болници</h2>
     <div class="medical-grid" id="hospitalGrid">
       <div class="loading-spinner" style="grid-column: 1/-1; text-align: center; padding: 40px; color: #6366f1;">
-        <div style="font-size: 2rem; margin-bottom: 20px;">🏥</div>
+        <div style="font-size: 2rem; margin-bottom: 20px;"></div>
         Зареждане на реални данни за болници в България...
       </div>
     </div>
@@ -112,7 +112,7 @@
       grid.innerHTML = hospitals.map(h => `
         <div class="medical-card" data-city="${h.city.toLowerCase()}">
           <div class="medical-card-header hospital">
-            <span class="medical-icon">🏥</span>
+            <span class="medical-icon"></span>
             <div>
               <h3>${h.name}</h3>
               <span class="medical-city">${h.city}</span>
