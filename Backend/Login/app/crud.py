@@ -14,7 +14,7 @@ def create_user(db: Session, user: schemas.UserCreate):
 
     db_user = models.User(
         email=user.email,
-        hashed_password=hashed_password
+        hashed_password=hashed_password,
         notify_fire=True,
         min_level=2
     )

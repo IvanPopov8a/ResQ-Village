@@ -144,7 +144,6 @@ async function pollSeismicData() {
  * https://firms.modaps.eosdis.nasa.gov/api/
  */
 async function pollFireData() {
-  async function pollFireData() {
     try {
         const url = process.env.FIRE_API_URL;
         const response = await axios.get(url);
