@@ -175,6 +175,17 @@ function clearDescError() {
 }
 
 
+// ── 3a. Наръчници (guides.html) ─────────────────────────
+function goToSurvivalGuide(disasterType) {
+  const t = (disasterType || 'other').toString().toLowerCase();
+  window.location.href = 'guides.html?type=' + encodeURIComponent(t);
+}
+window.goToSurvivalGuide = goToSurvivalGuide;
+window.isResqReportMode = function () {
+  return reportMode;
+};
+
+
 // ── 4. Toast helper ──────────────────────────────────────
 function showToast(msg, type) {
   let t = document.getElementById('resqToast');
@@ -220,8 +231,9 @@ function addMarker(r, index) {
     verifyBtn = '<div style="font-size:10px; color:#94a3b8; margin-top:10px;"><a href="#" onclick="openAuth(\'login\'); return false;">Влезте</a>, за да потвърдите</div>';
   }
 
-  marker.bindPopup(`
+  const popupHtml = `
     <div style="font-family:Outfit,sans-serif;min-width:180px">
+      <p style="margin:0 0 8px;font-size:11px;color:#94a3b8;">Shift+клик върху точката отваря този прозорец за потвърждение.</p>
       <div style="display:flex; justify-content:space-between; align-items:flex-start;">
         <strong>${emoji} ${label}</strong>
       </div>
@@ -230,8 +242,20 @@ function addMarker(r, index) {
       <small>👤︎ ${r.user} — ${r.time}</small>
       ${verifyBtn}
     </div>
-  `);
-  
+  `;
+  marker.bindPopup(popupHtml, { closeButton: true, autoPan: true });
+
+  marker.on('click', function (e) {
+    L.DomEvent.stopPropagation(e);
+    if (reportMode) return;
+    if (e.originalEvent && e.originalEvent.shiftKey) {
+      marker.openPopup();
+      return;
+    }
+    marker.closePopup();
+    goToSurvivalGuide(r.type);
+  });
+
   return marker;
 }
 
@@ -282,39 +306,40 @@ function switchSidebarTab(tab) {
   if (isAlerts) renderSidebarAlerts();
 }
 
-// Demo Alerts (from alerts.html)
-const demoAlerts = [
-  { type: 'storm', risk: 'low', title: 'Силен вятър', desc: 'Скорост 45-55 км/ч в планинските райони.', time: 'Преди 12 мин.', lat: 42.1354, lng: 24.7453 },
-  { type: 'flood', risk: 'medium', title: 'Интензивни валежи', desc: 'Очакват се над 40 л/м² в районите на Варна и Бургас.', time: 'Преди 38 мин.', lat: 43.2141, lng: 27.9147 },
-  { type: 'earthquake', risk: 'high', title: 'Земетресение ML 3.2', desc: 'Регистрирано в района на Попово. Афтершокове са възможни.', time: 'Преди 1 ч. 15 мин.', lat: 43.3444, lng: 26.2236 },
-  { type: 'fire', risk: 'medium', title: 'Висок риск от пожар', desc: 'В районите на Родопите и Странджа поради суша.', time: 'Днес, 06:30', lat: 41.6667, lng: 25.3667 }
-];
-
 function renderSidebarAlerts() {
   const list = document.getElementById('alertsList');
-  const icons = { fire:'🔥', flood:'🌊', earthquake:'🌍', storm:'🌬️', other:'⚠️' };
-  
-  // Combine demo alerts with user reports
-  const userReports = reports.map(r => ({
-    title: { fire:'Пожар', flood:'Наводнение', earthquake:'Земетресение', storm:'Буря', landslide:'Свлачище', other:'Друго' }[r.type] || 'Сигнал',
+  if (!list) return;
+
+  const icons = { fire:'🔥', flood:'🌊', earthquake:'🌍', storm:'⛈️', landslide:'🏔️', other:'⚠️' };
+  const label = { fire:'Пожар', flood:'Наводнение', earthquake:'Земетресение', storm:'Буря', landslide:'Свлачище', other:'Друго' };
+
+  const items = reports.map((r) => ({
+    title: label[r.type] || 'Сигнал',
     desc: r.desc || 'Няма описание',
     risk: r.risk,
     type: r.type,
     time: r.time,
     lat: r.lat,
     lng: r.lng,
-    isUserReport: true
   }));
 
-  const allAlerts = [...demoAlerts, ...userReports];
+  if (items.length === 0) {
+    list.innerHTML =
+      '<div class="list-empty">Няма подадени сигнали. Натиснете „Сигнализирай за бедствие“, за да подадете първия.</div>';
+    return;
+  }
 
-  list.innerHTML = allAlerts.map(a => `
+  list.innerHTML = items
+    .map(
+      (a) => `
     <div class="sidebar-alert-card ${a.risk}" onclick="zoomToAlert(${a.lat}, ${a.lng})" style="cursor:pointer;">
-      <h4>${icons[a.type] || '⚠️'} ${a.title} ${a.isUserReport ? '<span style="font-size:10px; opacity:0.6;">(Потребителски)</span>' : ''}</h4>
+      <h4>${icons[a.type] || '⚠️'} ${a.title}</h4>
       <p>${a.desc}</p>
       <span class="sidebar-alert-time">${a.time}</span>
     </div>
-  `).join('');
+  `
+    )
+    .join('');
 }
 
 function zoomToAlert(lat, lng) {

@@ -107,6 +107,18 @@ function loadRiskRegions() {
           layer.on('mouseout', function() {
             riskGeoLayer.resetStyle(this);
           });
+
+          layer.on('click', function (e) {
+            L.DomEvent.stopPropagation(e);
+            if (window.isResqReportMode && window.isResqReportMode()) return;
+            const data = threatData[nuts3] || { threat: 'none' };
+            const raw = (data.threat && data.threat !== 'none') ? data.threat : 'other';
+            if (typeof window.goToSurvivalGuide === 'function') {
+              window.goToSurvivalGuide(raw);
+            } else {
+              window.location.href = 'guides.html?type=' + encodeURIComponent(raw);
+            }
+          });
         }
       }).addTo(map);
     })

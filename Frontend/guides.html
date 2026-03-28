@@ -44,7 +44,7 @@
 
     <div class="guides-grid">
 
-      <div class="guide-card" onclick="toggleGuide(this)">
+      <div class="guide-card" id="guide-fire" onclick="toggleGuide(this)">
         <div class="guide-card-header">
           <span class="guide-icon">🔥</span>
           <div>
@@ -63,7 +63,7 @@
         </div>
       </div>
 
-      <div class="guide-card" onclick="toggleGuide(this)">
+      <div class="guide-card" id="guide-flood" onclick="toggleGuide(this)">
         <div class="guide-card-header">
           <span class="guide-icon">🌊</span>
           <div>
@@ -81,7 +81,7 @@
         </div>
       </div>
 
-      <div class="guide-card" onclick="toggleGuide(this)">
+      <div class="guide-card" id="guide-earthquake" onclick="toggleGuide(this)">
         <div class="guide-card-header">
           <span class="guide-icon">🌍</span>
           <div>
@@ -100,7 +100,7 @@
         </div>
       </div>
 
-      <div class="guide-card" onclick="toggleGuide(this)">
+      <div class="guide-card" id="guide-storm" onclick="toggleGuide(this)">
         <div class="guide-card-header">
           <span class="guide-icon">⛈️</span>
           <div>
@@ -118,7 +118,7 @@
         </div>
       </div>
 
-      <div class="guide-card" onclick="toggleGuide(this)">
+      <div class="guide-card" id="guide-landslide" onclick="toggleGuide(this)">
         <div class="guide-card-header">
           <span class="guide-icon">🏔️</span>
           <div>
@@ -135,7 +135,7 @@
         </div>
       </div>
 
-      <div class="guide-card" onclick="toggleGuide(this)">
+      <div class="guide-card" id="guide-bag" onclick="toggleGuide(this)">
         <div class="guide-card-header">
           <span class="guide-icon">🎒</span>
           <div>
@@ -188,6 +188,31 @@
     function toggleGuide(card) {
       card.classList.toggle('open');
     }
+
+    /** Open the right card when linked from the map (?type=fire etc.). */
+    (function syncGuideFromQuery() {
+      const params = new URLSearchParams(window.location.search);
+      const raw = (params.get('type') || params.get('threat') || '').toLowerCase().trim();
+      const toSection = {
+        fire: 'guide-fire',
+        flood: 'guide-flood',
+        earthquake: 'guide-earthquake',
+        storm: 'guide-storm',
+        landslide: 'guide-landslide',
+        drought: 'guide-bag',
+        heatwave: 'guide-bag',
+        none: 'guide-bag',
+        other: 'guide-bag'
+      };
+      const id = toSection[raw] || (raw ? 'guide-bag' : null);
+      if (!id) return;
+      const el = document.getElementById(id);
+      if (!el) return;
+      el.classList.add('open');
+      requestAnimationFrame(function () {
+        el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      });
+    })();
   </script>
 </body>
 </html>
