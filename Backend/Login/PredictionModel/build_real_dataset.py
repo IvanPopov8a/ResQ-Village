@@ -9,16 +9,7 @@ from io import StringIO
 import ssl
 import os
 
-# --- SSL FIX FOR PYTHON 3.14 ---
-try:
-    _create_unverified_https_context = ssl._create_unverified_context
-except AttributeError:
-    pass
-else:
-    ssl._create_default_https_context = _create_unverified_https_context
-
-urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
-warnings.filterwarnings("ignore")
+# SSL verification is enabled by default - do not disable for security
 
 # =============================================================================
 # CONFIGURATION - TUNED FOR QUICK HISTORICAL TESTING
@@ -43,7 +34,7 @@ def fetch_firms_fires(year):
     url = f"https://firms.modaps.eosdis.nasa.gov/api/area/csv/{NASA_FIRMS_API_KEY}/{sensor}/{BG_BBOX}/5/{year}-08-10"
     
     try:
-        r = requests.get(url, timeout=30, verify=False)
+        r = requests.get(url, timeout=30, verify=True)
         if r.status_code == 200 and len(r.text) > 150:
             df = pd.read_csv(StringIO(r.text))
             df.columns = [c.lower().strip() for c in df.columns]
@@ -64,7 +55,7 @@ def fetch_weather_for_location(lat, lon, date_str):
         "timezone": "GMT"
     }
     try:
-        r = requests.get(url, params=params, timeout=15, verify=False)
+        r = requests.get(url, params=params, timeout=15, verify=True)
         if r.status_code == 200:
             return pd.DataFrame(r.json()['daily'])
     except: pass

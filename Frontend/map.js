@@ -50,7 +50,7 @@ const COOLDOWN_MS  = 15 * 60 * 1000;
 const BLOCK_RADIUS = 0.018;
 
 function startReport() {
-  if (!localStorage.getItem('resq_session')) { openAuth('login'); return; }
+  // Removed login requirement for reporting
   reportMode = true;
   document.getElementById('reportHint').style.display = 'flex';
   document.getElementById('reportBtn').style.display  = 'none';
@@ -70,14 +70,16 @@ map.on('click', function(e) {
   if (!reportMode) return;
   const user = localStorage.getItem('resq_session') || 'Анонимен';
   
-  // Проверка за cooldown
-  const key  = 'resq_last_report_' + user;
-  const last = parseInt(localStorage.getItem(key) || '0', 10);
-  if (Date.now() - last < COOLDOWN_MS) {
-    const rem = Math.ceil((COOLDOWN_MS - (Date.now() - last)) / 60000);
-    showToast(`Изчакай още ${rem} мин. преди нов сигнал.`, 'warn');
-    cancelReport();
-    return;
+  // Проверка за cooldown (skip for anonymous)
+  if (user !== 'Анонимен') {
+    const key  = 'resq_last_report_' + user;
+    const last = parseInt(localStorage.getItem(key) || '0', 10);
+    if (Date.now() - last < COOLDOWN_MS) {
+      const rem = Math.ceil((COOLDOWN_MS - (Date.now() - last)) / 60000);
+      showToast(`Изчакай още ${rem} мин. преди нов сигнал.`, 'warn');
+      cancelReport();
+      return;
+    }
   }
 
   // Проверка за близост
@@ -138,7 +140,9 @@ function submitReport() {
 
   reports.push(newReport);
   localStorage.setItem('resq_reports', JSON.stringify(reports));
-  localStorage.setItem('resq_last_report_' + user, Date.now().toString());
+  if (user !== 'Анонимен') {
+    localStorage.setItem('resq_last_report_' + user, Date.now().toString());
+  }
 
   if (tempMarker) { map.removeLayer(tempMarker); tempMarker = null; }
   addMarker(newReport, reports.length - 1);

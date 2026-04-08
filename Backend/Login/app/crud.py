@@ -1,6 +1,6 @@
 from sqlalchemy.orm import Session
 from . import models, schemas
-from .auth import hash_password
+from .auth import hash_password, validate_password
 from sqlalchemy import func
 from geoalchemy2.functions import ST_SetSRID, ST_MakePoint
 
@@ -10,6 +10,13 @@ def get_user_by_email(db: Session, email: str):
 
 
 def create_user(db: Session, user: schemas.UserCreate):
+    existing = get_user_by_email(db, user.email)
+    if existing:
+        raise ValueError("User with this email already exists")
+
+    # Validate password strength
+    validate_password(user.password)
+
     hashed_password = hash_password(user.password)
 
     db_user = models.User(

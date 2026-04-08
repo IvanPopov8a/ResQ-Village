@@ -1,6 +1,7 @@
 from passlib.context import CryptContext
 from jose import jwt, JWTError
 from datetime import datetime, timedelta
+import re
 
 from fastapi.security import OAuth2PasswordBearer
 from fastapi import Depends, HTTPException
@@ -10,15 +11,37 @@ from .database import get_db
 from . import crud
 import os
 
+# Validate required environment variables at startup
+REQUIRED_ENV_VARS = ['SECRET_KEY', 'DATABASE_URL']
+missing = [v for v in REQUIRED_ENV_VARS if not os.getenv(v)]
+if missing:
+    raise RuntimeError(f"Missing required environment variables: {', '.join(missing)}")
+
 SECRET_KEY = os.getenv("SECRET_KEY")
 ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 60
+ACCESS_TOKEN_EXPIRE_MINUTES = 1440  # 24 hours
 REFRESH_TOKEN_EXPIRE_DAYS = 7
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 # This extracts the Bearer token from the Authorization header
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="login")
+
+def validate_password(password: str):
+    """
+    Validate password strength requirements
+    """
+    if len(password) < 12:
+        raise ValueError("Password must be at least 12 characters long")
+    if not re.search(r'[A-Z]', password):
+        raise ValueError("Password must contain at least one uppercase letter")
+    if not re.search(r'[a-z]', password):
+        raise ValueError("Password must contain at least one lowercase letter")
+    if not re.search(r'[0-9]', password):
+        raise ValueError("Password must contain at least one digit")
+    if not re.search(r'[!@#$%^&*()_+\-=\[\]{};\':"\\|,.<>\/?]', password):
+        raise ValueError("Password must contain at least one special character")
+    return True
 
 def create_refresh_token(data: dict):
     to_encode = data.copy()

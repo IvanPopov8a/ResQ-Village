@@ -51,6 +51,12 @@ async function notifyUsersInZone(alert, io) {
   const { type, level, level_name, origin_lat, origin_lng, radius_meters,
           title_bg, body_bg, id: alertId } = alert;
 
+  // Validate type to prevent SQL injection
+  const validTypes = ['flood', 'earthquake', 'fire'];
+  if (!validTypes.includes(type)) {
+    throw new Error(`Invalid disaster type: ${type}`);
+  }
+
   logger.info(`Известяване за алерт #${alertId}: ${type} ${level_name} | радиус ${radius_meters}м`);
 
   // Намери всички потребители в засегнатата зона
@@ -61,7 +67,11 @@ async function notifyUsersInZone(alert, io) {
       u.phone,
       u.push_subscription,
       u.sms_fallback,
-      u.notify_${type} AS notify_this_type,
+      CASE
+        WHEN $5::text = 'flood' THEN u.notify_flood
+        WHEN $5::text = 'earthquake' THEN u.notify_earthquake
+        WHEN $5::text = 'fire' THEN u.notify_fire
+      END AS notify_this_type,
       u.min_level,
       -- Изчисли разстоянието в метри за логване
       ST_Distance(
@@ -78,10 +88,14 @@ async function notifyUsersInZone(alert, io) {
         $3  -- радиус в метри
       )
       -- Иска да получава известия за този тип бедствие
-      AND u.notify_${type} = true
+      AND CASE
+        WHEN $5::text = 'flood' THEN u.notify_flood
+        WHEN $5::text = 'earthquake' THEN u.notify_earthquake
+        WHEN $5::text = 'fire' THEN u.notify_fire
+      END = true
       -- Нивото е над минималния му праг
       AND $4 >= u.min_level
-  `, [origin_lat, origin_lng, radius_meters, level]);
+  `, [origin_lat, origin_lng, radius_meters, level, type]);
 
   const users = usersResult.rows;
   logger.info(`Намерени ${users.length} потребители в зоната`);

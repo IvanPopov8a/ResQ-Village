@@ -27,7 +27,7 @@ class User(Base):
     __tablename__ = "users"
     id = Column(Integer, primary_key=True, index=True)
     email = Column(String(255), unique=True, index=True)
-    hashed_password = Column(String)
+    hashed_password = Column(String(255), nullable=False)
 
     phone = Column(String(20), unique=True) 
     notify_flood = Column(Boolean, default=True)
@@ -55,8 +55,6 @@ class Alert(Base):
     active = Column(Boolean, default=True)
     notified_push = Column(Integer, default=0)
     notified_sms = Column(Integer, default=0)
-    
-    level_name = Column(String(20))
 
     village_id = Column(Integer, ForeignKey("villages.id"))
     created_at = Column(TIMESTAMP, server_default=func.now())

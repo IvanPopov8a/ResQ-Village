@@ -3,7 +3,13 @@
  * Manages all HTTP communication with the Python Backend.
  */
 
-const API_BASE_URL = 'http://127.0.0.1:8000';
+// Configuration - change these for production
+const API_BASE_URL = window.location.protocol + '//' + window.location.hostname + ':8000';
+
+const API = {
+  login: `${API_BASE_URL}/login`,
+  register: `${API_BASE_URL}/users`,
+};
 
 const api = {
     /**
@@ -24,6 +30,25 @@ const api = {
             const data = await response.json();
 
             if (!response.ok) {
+                // Handle 401 Unauthorized - token expired
+                if (response.status === 401 && token) {
+                    // Token is invalid, logout user
+                    localStorage.removeItem('resq_session_email');
+                    localStorage.removeItem('resq_session');
+                    localStorage.removeItem('resq_token');
+                    // Update UI if elements exist
+                    const authButtons = document.getElementById('authButtons');
+                    const userGreeting = document.getElementById('userGreeting');
+                    if (authButtons && userGreeting) {
+                        authButtons.style.display = 'flex';
+                        userGreeting.style.display = 'none';
+                    }
+                    // Open login modal
+                    if (typeof openAuth === 'function') {
+                        openAuth('login');
+                    }
+                    return { error: 'Сесията е изтекла. Моля, влезте отново.', status: 401 };
+                }
                 // Return errors in a consistent format
                 return { error: data.error || data.detail || 'Възникна системна грешка', status: response.status };
             }

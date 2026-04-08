@@ -177,19 +177,21 @@ async function setup() {
         ('Madzharovo', 'Haskovo', 41.6000, 25.8500, 0, '0888000049'),
         ('Harmanli', 'Haskovo', 41.9300, 25.9000, 0, '0888000050');
     `);
+    await client.query(`
+  ALTER TABLE villages ADD COLUMN IF NOT EXISTS fire_probability FLOAT DEFAULT 0.0;
+  ALTER TABLE villages ADD COLUMN IF NOT EXISTS flood_probability FLOAT DEFAULT 0.0;
+  ALTER TABLE villages ADD COLUMN IF NOT EXISTS earthquake_probability FLOAT DEFAULT 0.0;
+`);
 
     console.log('Новите бази данни са успешно заредени!');
   } catch (err) {
     console.error('Грешка при инициализация на базата:', err);
   } finally {
     client.release();
-    pool.end();
+    //pool.end();
   }
 }
 
-setup();
-
-    console.log('Новите бази данни са успешно заредени!');
 setup();
 
 module.exports = pool;

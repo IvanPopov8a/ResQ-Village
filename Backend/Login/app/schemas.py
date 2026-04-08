@@ -38,3 +38,13 @@ class VillageResponse(BaseModel):
 
     class Config:
         from_attributes = True
+
+class DistrictGuideRequest(BaseModel):
+    lat: float
+    lng: float
+    has_disaster: bool = False
+
+class SafeLocationRequest(BaseModel):
+    lat: float
+    lng: float
+    current_district_id: Optional[str] = None

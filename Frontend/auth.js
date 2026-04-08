@@ -48,9 +48,26 @@ async function doRegister(e) {
   const password = document.getElementById('regPass').value.trim();
   const confirm = document.getElementById('regPass2').value.trim();
 
-  if (password.length < 8) { 
-    showMsg('Паролата трябва да е поне 8 символа, съдържаща главна/малка буква, цифра и специален символ.', 'error'); 
-    return; 
+  // Validate password strength
+  if (password.length < 12) {
+    showMsg('Паролата трябва да е поне 12 символа.', 'error');
+    return;
+  }
+  if (!/[A-Z]/.test(password)) {
+    showMsg('Паролата трябва да съдържа поне една главна буква.', 'error');
+    return;
+  }
+  if (!/[a-z]/.test(password)) {
+    showMsg('Паролата трябва да съдържа поне една малка буква.', 'error');
+    return;
+  }
+  if (!/[0-9]/.test(password)) {
+    showMsg('Паролата трябва да съдържа поне една цифра.', 'error');
+    return;
+  }
+  if (!/[!@#$%^&*()_+\-=\[\]{};\':"\\|,.<>\/?]/.test(password)) {
+    showMsg('Паролата трябва да съдържа поне един специален символ.', 'error');
+    return;
   }
   if (password !== confirm) { 
     showMsg('Паролите не съвпадат.', 'error'); 
@@ -80,6 +97,7 @@ async function doRegister(e) {
 
 function loginSuccess(email) {
   localStorage.setItem('resq_session_email', email);
+  localStorage.setItem('resq_session', email);  // Set for map.js usage
   document.getElementById('authButtons').style.display  = 'none';
   document.getElementById('userGreeting').style.display = 'flex';
   
@@ -92,6 +110,7 @@ function loginSuccess(email) {
 
 function logout() {
   localStorage.removeItem('resq_session_email');
+  localStorage.removeItem('resq_session');
   localStorage.removeItem('resq_token');
   document.getElementById('authButtons').style.display  = 'flex';
   document.getElementById('userGreeting').style.display = 'none';
@@ -125,6 +144,7 @@ document.addEventListener('DOMContentLoaded', function () {
   const token = localStorage.getItem('resq_token');
   
   if (email && token && document.getElementById('authButtons')) {
+    localStorage.setItem('resq_session', email);  // Ensure it's set
     document.getElementById('authButtons').style.display  = 'none';
     document.getElementById('userGreeting').style.display = 'flex';
     

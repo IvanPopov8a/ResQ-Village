@@ -6,12 +6,13 @@ import numpy as np
 import joblib
 import xgboost as xgb
 from contextlib import asynccontextmanager
-from fastapi import FastAPI, Depends
+from fastapi import FastAPI, Depends, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 from sqlalchemy import func
 from typing import List
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
+import os
 
 from .database import engine, SessionLocal, get_db
 from . import models, schemas, crud
@@ -21,9 +22,9 @@ from .services import trigger_node_alert
 # ---------------------------------------------------------------------------
 # 1. LOAD MODEL
 # ---------------------------------------------------------------------------
-MODEL_PATH = 'best_fire_model_weight_50.0.joblib'
+MODEL_PATH = os.path.join(os.path.dirname(__file__), '..', 'PredictionModel', 'best_fire_model_weight_50.0.joblib')
 try:
-    fire_model = joblib.load(MODEL_PATH)
+    fire_model = joblib.load(os.path.abspath(MODEL_PATH))
     print("✅ AI Model loaded and ready.")
 except Exception as e:
     print(f"⚠️ Warning: AI Model could not load: {e}")
@@ -33,111 +34,117 @@ except Exception as e:
 # 2. HOURLY BACKGROUND INFERENCE LOGIC
 # ---------------------------------------------------------------------------
 
-# Global semaphore to limit concurrent HTTP requests (prevents API rate-limiting)
-http_semaphore = asyncio.Semaphore(10)
-
 async def fetch_and_predict(client: httpx.AsyncClient, village: dict):
     """
     Fetches weather, calculates KBDI correctly, and makes a prediction.
     Returns a dictionary of updates rather than accessing the DB directly.
     """
-    async with http_semaphore:
-        now_utc = datetime.datetime.now(datetime.timezone.utc).replace(tzinfo=None)
-        result = {"id": village["id"], "success": False}
+    now_utc = datetime.datetime.now(datetime.timezone.utc).replace(tzinfo=None)
+    result = {"id": village["id"], "success": False}
 
-        # --- A. PERSISTENCE LOGIC (Retention) ---
-        if village["fire_event_started_at"]:
-            hours_passed = (now_utc - village["fire_event_started_at"]).total_seconds() / 3600
-            
-            if hours_passed < 14:
-                print(f"🔥 {village['name']} is in PERSISTENCE MODE (Hour {hours_passed:.1f}/14).")
-                result["success"] = True
-                return result
-            else:
-                result["clear_persistence"] = True
-
-        # --- B. DRILL / SYNTHETIC DATA LOGIC ---
-        is_drill_time = (
-            village["id"] == 1 and 
-            now_utc.date() == datetime.date(2026, 3, 28) and 
-            now_utc.hour >= 7 # 7 AM UTC is 9 AM Bulgarian Time
-        )
-
-        if is_drill_time:
-            print(f"🚨 [DRILL] Injecting synthetic fire data for {village['name']}")
-            temp, hum, wind = 42.0, 11.0, 38.0
-            rain_24h = 0.0
-            dsr = 30
-            drought_idx = 400.0 # High KBDI
-            fuel_idx = 0.95
+    # --- A. PERSISTENCE LOGIC (Retention) ---
+    if village["fire_event_started_at"]:
+        hours_passed = (now_utc - village["fire_event_started_at"]).total_seconds() / 3600
+        
+        if hours_passed < 14:
+            print(f"🔥 {village['name']} is in PERSISTENCE MODE (Hour {hours_passed:.1f}/14).")
+            result["success"] = True
+            return result
         else:
-            # NORMAL OPERATION: Fetch real weather
-            url = "https://api.open-meteo.com/v1/forecast"
-            params = {
-                "latitude": village["lat"],
-                "longitude": village["lng"],
-                "hourly": ["temperature_2m", "relative_humidity_2m", "wind_speed_10m", "precipitation"],
-                "daily": ["temperature_2m_max", "precipitation_sum"],
-                "past_days": 60,   # Need 60 days to accurately calculate KBDI
-                "forecast_days": 1,
-                "timezone": "UTC"
-            }
+            result["clear_persistence"] = True
+
+    # --- B. DRILL / SYNTHETIC DATA LOGIC ---
+    is_drill_time = (
+        village["id"] == 1 and 
+        now_utc.date() == datetime.date(2026, 3, 28) and 
+        now_utc.hour >= 7 # 7 AM UTC is 9 AM Bulgarian Time
+    )
+
+    if is_drill_time:
+        print(f"🚨 [DRILL] Injecting synthetic fire data for {village['name']}")
+        temp, hum, wind = 42.0, 11.0, 38.0
+        rain_24h = 0.0
+        dsr = 30
+        drought_idx = 400.0 # High KBDI
+        fuel_idx = 0.95
+    else:
+        # NORMAL OPERATION: Fetch real weather
+        url = "https://api.open-meteo.com/v1/forecast"
+        
+        # FIXED: hourly and daily are comma-separated strings!
+        params = {
+            "latitude": village["lat"],
+            "longitude": village["lng"],
+            "hourly": "temperature_2m,relative_humidity_2m,wind_speed_10m,precipitation",
+            "daily": "temperature_2m_max,precipitation_sum",
+            "past_days": 60,   
+            "forecast_days": 1,
+            "timezone": "UTC"
+        }
+        
+        headers = {
+            "User-Agent": "ResQ-Village-AI-Engine/1.0"
+        }
+        
+        try:
+            resp = await client.get(url, params=params, headers=headers, timeout=15.0)
             
-            try:
-                resp = await client.get(url, params=params, timeout=15.0)
-                if resp.status_code != 200: return result
-                data = resp.json()
-                
-                # 1. Compute Historical Derived Features (KBDI & Days Since Rain)
-                daily_df = pd.DataFrame(data['daily'])
-                dsr = 0
-                kbdi = 50.0
-                for _, row in daily_df.iterrows():
-                    rain = float(row.get('precipitation_sum', 0) or 0)
-                    temp_max = float(row.get('temperature_2m_max', 25) or 25)
-                    dsr = 0 if rain > 1.0 else dsr + 1
-                    net_rain = max(0.0, rain - 5.0)
-                    daily_drying = ((800 - kbdi) * (0.968 * np.exp(0.0486 * temp_max) - 8.3)) / 1000
-                    kbdi = float(np.clip(kbdi + daily_drying - net_rain * 3.94, 0, 800))
-                
-                drought_idx = round(kbdi, 2)
-
-                # 2. Extract 12h Forecast for immediate conditions
-                hourly_df = pd.DataFrame(data['hourly'])
-                hourly_df['time'] = pd.to_datetime(hourly_df['time']).dt.tz_localize(None)
-
-                target_time = now_utc + pd.Timedelta(hours=12)
-                idx = (hourly_df['time'] - target_time).abs().idxmin()
-                
-                temp = hourly_df.loc[idx, 'temperature_2m']
-                hum = hourly_df.loc[idx, 'relative_humidity_2m']
-                wind = hourly_df.loc[idx, 'wind_speed_10m']
-                
-                # 3. Calculate trailing 24h rain
-                now_idx = (hourly_df['time'] - now_utc).abs().idxmin()
-                rain_24h = hourly_df.iloc[max(0, now_idx-24) : now_idx]['precipitation'].sum()
-                
-                # 4. Calculate final fuel curing based on predicted humidity
-                fuel_idx = round(float(np.clip(0.3 + (kbdi/800)*0.4 + max(0, (50-hum)/50)*0.3, 0.3, 1.0)), 3)
-
-            except Exception as e:
-                print(f"❌ Weather Fetch Error for {village['name']}: {e}")
+            if resp.status_code != 200: 
+                print(f"❌ HTTP {resp.status_code} for {village['name']}: {resp.text}")
                 return result
+                
+            data = resp.json()
+            
+            # 1. Compute Historical Derived Features (KBDI & Days Since Rain)
+            daily_df = pd.DataFrame(data['daily'])
+            dsr = 0
+            kbdi = 50.0
+            for _, row in daily_df.iterrows():
+                rain = float(row.get('precipitation_sum', 0) or 0)
+                temp_max = float(row.get('temperature_2m_max', 25) or 25)
+                dsr = 0 if rain > 1.0 else dsr + 1
+                net_rain = max(0.0, rain - 5.0)
+                daily_drying = ((800 - kbdi) * (0.968 * np.exp(0.0486 * temp_max) - 8.3)) / 1000
+                kbdi = float(np.clip(kbdi + daily_drying - net_rain * 3.94, 0, 800))
+            
+            drought_idx = round(kbdi, 2)
 
-        # --- C. PREDICTION ---
-        if fire_model:
-            features = [[temp, hum, wind, rain_24h, dsr, drought_idx, fuel_idx]]
-            input_df = pd.DataFrame(features, columns=['temp', 'hum', 'wind', 'rain', 'days_since_rain', 'drought_index', 'fuel_curing_index'])
+            # 2. Extract 12h Forecast for immediate conditions
+            hourly_df = pd.DataFrame(data['hourly'])
+            hourly_df['time'] = pd.to_datetime(hourly_df['time']).dt.tz_localize(None)
+
+            target_time = now_utc + pd.Timedelta(hours=12)
+            idx = (hourly_df['time'] - target_time).abs().idxmin()
             
-            prob = float(fire_model.predict_proba(input_df)[0][1])
+            temp = hourly_df.loc[idx, 'temperature_2m']
+            hum = hourly_df.loc[idx, 'relative_humidity_2m']
+            wind = hourly_df.loc[idx, 'wind_speed_10m']
             
-            result["update_predictions"] = True
-            result["prob"] = prob
-            result["risk_level"] = 3 if prob > 0.75 else 2 if prob > 0.4 else 1
-            result["ignite"] = (prob > 0.75 and village["fire_event_started_at"] is None)
+            # 3. Calculate trailing 24h rain
+            now_idx = (hourly_df['time'] - now_utc).abs().idxmin()
+            rain_24h = hourly_df.iloc[max(0, now_idx-24) : now_idx]['precipitation'].sum()
             
-        result["success"] = True
-        return result
+            # 4. Calculate final fuel curing based on predicted humidity
+            fuel_idx = round(float(np.clip(0.3 + (kbdi/800)*0.4 + max(0, (50-hum)/50)*0.3, 0.3, 1.0)), 3)
+
+        except Exception as e:
+            print(f"❌ Weather Fetch Error for {village['name']}: {e}")
+            return result
+
+    # --- C. PREDICTION ---
+    if fire_model:
+        features = [[temp, hum, wind, rain_24h, dsr, drought_idx, fuel_idx]]
+        input_df = pd.DataFrame(features, columns=['temp', 'hum', 'wind', 'rain', 'days_since_rain', 'drought_index', 'fuel_curing_index'])
+        
+        prob = float(fire_model.predict_proba(input_df)[0][1])
+        
+        result["update_predictions"] = True
+        result["prob"] = prob
+        result["risk_level"] = 3 if prob > 0.75 else 2 if prob > 0.4 else 1
+        result["ignite"] = (prob > 0.75 and village["fire_event_started_at"] is None)
+        
+    result["success"] = True
+    return result
 
 async def run_global_inference():
     """Loops through all villages safely."""
@@ -147,7 +154,6 @@ async def run_global_inference():
     db = SessionLocal()
     try:
         villages = db.query(models.Village).all()
-        # Extract data into simple dictionaries so we don't pass SQLAlchemy objects to async tasks
         village_dicts = [{
             "id": v.id,
             "name": v.name,
@@ -158,10 +164,16 @@ async def run_global_inference():
     finally:
         db.close()
 
-    # Async Fetch Phase
+    # Async Fetch Phase (Sequential to avoid 429 burst limit errors)
+    results = []
     async with httpx.AsyncClient() as client:
-        tasks = [fetch_and_predict(client, vd) for vd in village_dicts]
-        results = await asyncio.gather(*tasks)
+        for i, vd in enumerate(village_dicts):
+            print(f"📡 Fetching weather for {vd['name']} ({i+1}/{len(village_dicts)})...")
+            res = await fetch_and_predict(client, vd)
+            results.append(res)
+            
+            # Wait 1.5 seconds before making the next request to respect Open-Meteo limits
+            await asyncio.sleep(1.5)
         
     # Write Phase (Sequential, safe for the database)
     db_write = SessionLocal()
@@ -170,8 +182,10 @@ async def run_global_inference():
             if not res or not res.get("success"):
                 continue
                 
-            v = db_write.query(models.Village).get(res["id"])
-            
+            v = db_write.get(models.Village, res["id"])
+            if v is None:
+                continue
+
             if res.get("clear_persistence"):
                 v.fire_event_started_at = None
                 
@@ -266,13 +280,149 @@ def get_status(db: Session = Depends(get_db)):
 
 @app.post("/users", response_model=schemas.UserResponse)
 def create_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
-    return crud.create_user(db, user)
+    try:
+        return crud.create_user(db, user)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
 
 @app.post("/login")
 def login(user: schemas.LoginRequest, db: Session = Depends(get_db)):
     db_user = crud.get_user_by_email(db, email=user.email)
     if not db_user or not verify_password(user.password, db_user.hashed_password):
-        return {"error": "Invalid credentials"}
+        raise HTTPException(status_code=401, detail="Invalid credentials")
     
     token = create_access_token({"sub": db_user.email})
     return {"access_token": token, "token_type": "bearer"}
+
+@app.get("/profile", response_model=schemas.UserResponse)
+def get_profile(current_user = Depends(get_current_user)):
+    """Returns the current authenticated user's profile."""
+    return current_user
+
+@app.get("/get-status", response_model=List[schemas.DistrictStatus])
+def get_status_alias(db: Session = Depends(get_db)):
+    """Alias for /districts/status for frontend compatibility."""
+    villages = db.query(models.Village).all()
+    results = []
+    
+    now_utc = datetime.datetime.now(datetime.timezone.utc).replace(tzinfo=None)
+    
+    for v in villages:
+        is_active_fire = False
+        if v.fire_event_started_at:
+            elapsed = (now_utc - v.fire_event_started_at).total_seconds() / 3600
+            if elapsed < 14:
+                is_active_fire = True
+
+        prob = 0.99 if is_active_fire else float(v.fire_probability or 0.0)
+        
+        results.append({
+            "district_id": str(v.id),
+            "district_name": v.name,
+            "lat": float(v.lat),
+            "lng": float(v.lng),
+            "probability": prob,
+            "risk_level": "Critical" if prob > 0.75 else "High" if prob > 0.4 else "Low",
+            "has_disaster": prob > 0.6,
+            "disaster_type": "fire"
+        })
+    return results
+
+@app.post("/districts/guide")
+def get_district_guide(
+    request: schemas.DistrictGuideRequest,
+    db: Session = Depends(get_db)
+):
+    """
+    Returns guidance and recommendations for a specific district.
+    Called when user needs evacuation or safety instructions.
+    """
+    lat = request.lat
+    lng = request.lng
+    has_disaster = request.has_disaster
+    
+    # Find nearest village to coordinates
+    from sqlalchemy import func
+    village = db.query(models.Village).order_by(
+        func.sqrt((models.Village.lat - lat) ** 2 + (models.Village.lng - lng) ** 2)
+    ).first()
+    
+    if not village:
+        return {
+            "status": "no_data",
+            "message": "Няма данни за този регион",
+            "recommendations": []
+        }
+    
+    risk_level = "Critical" if has_disaster else (
+        "High" if float(village.fire_probability or 0.0) > 0.4 else "Low"
+    )
+    
+    # Generate guidance based on risk level
+    if risk_level == "Critical":
+        recommendations = [
+            "🔴 ЕВАКУАЦИЯ: Напустете незабавно региона",
+            "📞 Позвънете на 112 за помощ при евакуация",
+            "🚗 Използвайте маршрутите на безопасност",
+            "📱 Следете официалните съобщения"
+        ]
+    elif risk_level == "High":
+        recommendations = [
+            "🟠 ВНИМАНИЕ: Пригответе се за евакуация",
+            "🎒 Подгответе документи и ценности",
+            "🚗 Запознайте се с маршрутите на евакуация",
+            "📱 Останете в готовност"
+        ]
+    else:
+        recommendations = [
+            "🟢 НИСКО НИВО НА РИСК",
+            "👥 Останете информирани",
+            "📱 Следете актуалната информация"
+        ]
+    
+    return {
+        "village_name": village.name,
+        "risk_level": risk_level,
+        "probability": float(village.fire_probability or 0.0),
+        "recommendations": recommendations
+    }
+
+@app.get("/safe-location")
+def get_safe_location(
+    lat: float,
+    lng: float,
+    current_district_id: str = None,
+    db: Session = Depends(get_db)
+):
+    """
+    Returns nearby safe locations (villages with low risk).
+    Used for evacuation planning.
+    """
+    # Get all villages sorted by distance
+    from sqlalchemy import func
+    villages = db.query(models.Village).order_by(
+        func.sqrt((models.Village.lat - lat) ** 2 + (models.Village.lng - lng) ** 2)
+    ).limit(10).all()
+    
+    safe_locations = []
+    for v in villages:
+        risk_level = 3 if float(v.fire_probability or 0.0) > 0.75 else 2 if float(v.fire_probability or 0.0) > 0.4 else 1
+        
+        # Only suggest low-risk areas as safe
+        if risk_level == 1:
+            safe_locations.append({
+                "id": v.id,
+                "name": v.name,
+                "lat": float(v.lat),
+                "lng": float(v.lng),
+                "distance_km": round(
+                    ((v.lat - lat) ** 2 + (v.lng - lng) ** 2) ** 0.5 * 111.32,
+                    1
+                ),  # Approximate km conversion
+                "risk_level": "Low"
+            })
+    
+    return {
+        "safe_locations": safe_locations[:5],  # Return top 5 closest safe locations
+        "message": "Препоръчани безопасни локации за евакуация"
+    }
